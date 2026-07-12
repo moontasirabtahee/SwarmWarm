@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwarmWarm - P2P Email Warmup Control Panel</title>
+    <!-- Google Fonts Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/index.css">
+</head>
+<body>
+    <div id="app">
+        <!-- ==================== SESSION GATEWAY VIEW ==================== -->
+        <div id="auth-view" class="view active">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <div class="logo">
+                            <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
+                            <span>SwarmWarm</span>
+                        </div>
+                        <h2 id="auth-title">Welcome Back</h2>
+                        <p id="auth-subtitle">Log in to manage your P2P email warmup fleet</p>
+                    </div>
+                    
+                    <form id="auth-form">
+                        <div class="form-group">
+                            <label for="auth-email">Account Email</label>
+                            <div class="input-wrapper">
+                                <i class="fa-regular fa-envelope input-icon"></i>
+                                <input type="email" id="auth-email" placeholder="name@company.com" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="auth-password">Password</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock input-icon"></i>
+                                <input type="password" id="auth-password" placeholder="••••••••" required>
+                            </div>
+                        </div>
+                        
+                        <div id="auth-error" class="alert-box error hidden">
+                            <i class="fa-solid fa-circle-exclamation alert-icon"></i>
+                            <span class="alert-msg">Invalid credentials. Please try again.</span>
+                        </div>
+                        
+                        <button type="submit" id="auth-submit-btn" class="btn btn-primary btn-block">
+                            <span>Sign In</span>
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        </button>
+                    </form>
+                    
+                    <div class="auth-footer">
+                        <span id="auth-toggle-msg">New to SwarmWarm?</span>
+                        <a href="#" id="auth-toggle-link">Create an account</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CONTROL CENTER WORKSPACE VIEW ==================== -->
+        <div id="dashboard-view" class="view">
+            <!-- App Header -->
+            <header class="app-header">
+                <div class="header-brand">
+                    <i class="fa-solid fa-fire-flame-curved brand-icon"></i>
+                    <span>SwarmWarm</span>
+                    <span class="badge badge-indigo">Control Plane</span>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="console-toggle" id="console-toggle-container" style="display: flex; gap: 8px;">
+                        <button id="toggle-user-btn" class="btn btn-sm btn-outline active" style="border-color: var(--color-primary);">User View</button>
+                        <button id="toggle-admin-btn" class="btn btn-sm btn-outline">Admin Radar</button>
+                    </div>
+                    <div class="user-profile">
+                        <div class="avatar">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <span id="user-email-display">user@swarmwarm.io</span>
+                    </div>
+                    <button id="logout-btn" class="btn btn-outline btn-sm">
+                        <i class="fa-solid fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <!-- ==================== USER DASHBOARD PANEL ==================== -->
+                <div id="user-dashboard-panel">
+                    <!-- Macro Stats Section -->
+                    <section class="metrics-grid">
+                        <div class="metric-card glow-blue">
+                            <div class="metric-icon bg-blue">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Dispatched Outbound</h3>
+                                <div class="metric-value" id="stat-sent">0</div>
+                                <p class="metric-subtext">Sent emails inside warmup network (24h)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card glow-green">
+                            <div class="metric-icon bg-green">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Spam Rescues</h3>
+                                <div class="metric-value" id="stat-rescued">0</div>
+                                <p class="metric-subtext">Inbox placement recoveries (24h)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card glow-indigo">
+                            <div class="metric-icon bg-indigo">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>AI Responses</h3>
+                                <div class="metric-value" id="stat-ai">0</div>
+                                <p class="metric-subtext">Replies generated using Gemma 4B</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Placement Health Meter -->
+                    <section class="health-overview-card">
+                        <div class="health-header">
+                            <h2>Overall Placement Health</h2>
+                            <span class="health-percentage" id="stat-health">100%</span>
+                        </div>
+                        <div class="health-bar-container">
+                            <div class="health-bar-fill" id="stat-health-fill" style="width: 100%"></div>
+                        </div>
+                        <p class="health-meta-text">Targeting 95%+ for peak sender domain authority</p>
+                    </section>
+
+                    <!-- Mailbox Fleet Command -->
+                    <section class="fleet-section">
+                        <div class="fleet-header">
+                            <div class="title-block">
+                                <h2>Mailbox Fleet</h2>
+                                <p>Manage and monitor inbox warmups</p>
+                            </div>
+                            <button id="add-mailbox-btn" class="btn btn-primary">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Onboard Mailbox</span>
+                            </button>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="fleet-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mailbox Address</th>
+                                        <th>Provider</th>
+                                        <th>SMTP Server</th>
+                                        <th>IMAP Server</th>
+                                        <th>Status</th>
+                                        <th class="text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mailbox-list-body">
+                                    <!-- Dynamic rows go here -->
+                                    <tr>
+                                        <td colspan="6" class="table-empty">
+                                            <i class="fa-solid fa-inbox"></i>
+                                            <p>No mailboxes onboarded yet. Connect your first inbox to join the swarm!</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ==================== ADMIN INFRASTRUCTURE PANEL ==================== -->
+                <div id="admin-dashboard-panel" class="hidden">
+                    <!-- Infrastructure Metrics Grid -->
+                    <section class="metrics-grid">
+                        <div class="metric-card glow-blue">
+                            <div class="metric-icon bg-blue" style="background-color: rgba(99, 102, 241, 0.1); color: var(--color-primary);">
+                                <i class="fa-solid fa-database"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Redis Queue Backlog</h3>
+                                <div class="metric-value" id="admin-redis-backlog">0</div>
+                                <p class="metric-subtext">Tasks pending in Celery broker</p>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card glow-green">
+                            <div class="metric-icon bg-green" style="background-color: rgba(16, 185, 129, 0.1); color: var(--color-green);">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Gemma 4B Inference</h3>
+                                <div class="metric-value" id="admin-gemma-speed">42.4</div>
+                                <p class="metric-subtext">Tokens/sec processing speeds</p>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card glow-indigo">
+                            <div class="metric-icon bg-indigo" style="background-color: rgba(245, 158, 11, 0.1); color: var(--color-warning);">
+                                <i class="fa-solid fa-temperature-three-quarters"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Local Hardware Temp</h3>
+                                <div class="metric-value" id="admin-temp">68°C</div>
+                                <p class="metric-subtext">Inference engine GPU status</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Global Operations Log Ledger -->
+                    <section class="fleet-section">
+                        <div class="fleet-header">
+                            <div class="title-block">
+                                <h2>Global Swarm Operations</h2>
+                                <p>Real-time cross-tenant background worker events stream</p>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="fleet-table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Tenant ID</th>
+                                        <th>Module</th>
+                                        <th>Action Description</th>
+                                        <th>Telemetry Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-log-stream-body">
+                                    <!-- SSE streams dynamic entries here -->
+                                    <tr>
+                                        <td colspan="5" class="table-empty">
+                                            <i class="fa-solid fa-circle-notch fa-spin"></i>
+                                            <p>Awaiting Server-Sent Events stream from the warmup loop simulator...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <!-- ==================== ONBOARDING WIZARD MODAL ==================== -->
+        <div id="onboard-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>Onboard Mailbox</h2>
+                    <button class="modal-close-btn" id="close-onboard-btn">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                
+                <form id="onboard-form">
+                    <!-- Step 1: Select Infrastructure Provider -->
+                    <div class="form-section">
+                        <label>Email Provider</label>
+                        <div class="provider-selector-grid">
+                            <div class="provider-card active" data-provider="google">
+                                <i class="fa-brands fa-google provider-logo text-google"></i>
+                                <span>Google</span>
+                            </div>
+                            <div class="provider-card" data-provider="microsoft">
+                                <i class="fa-brands fa-windows provider-logo text-microsoft"></i>
+                                <span>Microsoft</span>
+                            </div>
+                            <div class="provider-card" data-provider="custom">
+                                <i class="fa-solid fa-server provider-logo text-custom"></i>
+                                <span>Custom</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contextual Password Warning Banner -->
+                    <div id="provider-warning" class="alert-box warning">
+                        <i class="fa-solid fa-triangle-exclamation alert-icon animate-pulse"></i>
+                        <div class="warning-text">
+                            <strong>Google Workspace Security Notice:</strong>
+                            <p>Do NOT enter your primary account password. You MUST generate a 16-character <strong>App Password</strong> in your Google Account Settings to authorize connection.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Connection Coordinates -->
+                    <div class="form-grid">
+                        <div class="form-group col-span-2">
+                            <label for="onboard-email">Mailbox Email Address</label>
+                            <input type="email" id="onboard-email" placeholder="inbox@domain.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="onboard-smtp-host">SMTP Host</label>
+                            <input type="text" id="onboard-smtp-host" value="smtp.gmail.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="onboard-smtp-port">SMTP Port</label>
+                            <input type="number" id="onboard-smtp-port" value="465" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="onboard-imap-host">IMAP Host</label>
+                            <input type="text" id="onboard-imap-host" value="imap.gmail.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="onboard-imap-port">IMAP Port</label>
+                            <input type="number" id="onboard-imap-port" value="993" required>
+                        </div>
+
+                        <div class="form-group col-span-2">
+                            <label for="onboard-password">App Password</label>
+                            <input type="password" id="onboard-password" placeholder="•••• •••• •••• ••••" required>
+                        </div>
+                    </div>
+
+                    <!-- Onboarding Submission Controls -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" id="cancel-onboard-btn">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="onboard-submit-btn">
+                            <span class="btn-text">Authenticate & Onboard</span>
+                            <div class="spinner hidden" id="onboard-spinner"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== ANALYTICS & LOG LEDGER SLIDE-OUT ==================== -->
+        <div id="analytics-modal" class="modal-overlay">
+            <div class="modal-card wide">
+                <div class="modal-header">
+                    <div>
+                        <h2 id="node-details-email">mailbox@domain.com</h2>
+                        <p class="subtitle" id="node-details-id">Node ID: mailbox_1</p>
+                    </div>
+                    <button class="modal-close-btn" id="close-analytics-btn">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                
+                <div class="analytics-grid">
+                    <!-- Ramp-up progress -->
+                    <div class="analytics-card card-progress">
+                        <h3>Ramp-up Target Schedule</h3>
+                        <div class="ramp-percentage" id="node-ramp-val">15 / 40 sends</div>
+                        <div class="health-bar-container">
+                            <div class="health-bar-fill" id="node-ramp-fill" style="width: 37.5%"></div>
+                        </div>
+                        <p class="card-meta">Increasing daily sends until 30-day ceiling is reached</p>
+                    </div>
+                    
+                    <!-- Placement split -->
+                    <div class="analytics-card card-split">
+                        <h3>Deliverability Placement Split</h3>
+                        <div class="placement-split-stat">
+                            <div class="split-segment">
+                                <span class="dot bg-green"></span>
+                                <span>Inbox: 75%</span>
+                            </div>
+                            <div class="split-segment">
+                                <span class="dot bg-red"></span>
+                                <span>Spam: 25%</span>
+                            </div>
+                        </div>
+                        <div class="health-bar-container double">
+                            <div class="health-bar-fill bg-green" style="width: 75%"></div>
+                            <div class="health-bar-fill bg-red" style="width: 25%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Log Ledger Panel -->
+                <div class="ledger-panel">
+                    <h3>Execution Activity Ledger</h3>
+                    <div class="table-container max-h-350">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Action type</th>
+                                    <th>Target Inbox</th>
+                                    <th>AI Replied</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="node-logs-body">
+                                <!-- Dynamic log rows go here -->
+                                <tr>
+                                    <td colspan="5" class="table-empty">No activity logs recorded. Warmup loops schedule nightly.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reactive application JS controller -->
+    <script src="/static/index.js"></script>
+</body>
+</html>
