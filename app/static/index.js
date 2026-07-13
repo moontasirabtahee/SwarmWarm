@@ -4,18 +4,25 @@
 
 // Global State
 let token = localStorage.getItem("swarmwarm_token") || null;
-let currentView = "auth";
+let currentView = "landing";
 let activeProvider = "google";
 let userEmail = localStorage.getItem("swarmwarm_email") || "";
 let sseSource = null;
 let isFirstAdminLog = true;
 
-// DOM Elements
+// DOM Views
+const landingView = document.getElementById("landing-view");
 const authView = document.getElementById("auth-view");
 const dashboardView = document.getElementById("dashboard-view");
 const onboardModal = document.getElementById("onboard-modal");
 const analyticsModal = document.getElementById("analytics-modal");
 
+// Landing Page Elements
+const landingLoginBtn = document.getElementById("landing-login-btn");
+const landingCtaBtn = document.getElementById("landing-cta-btn");
+const backToLanding = document.getElementById("back-to-landing");
+
+// Auth Form Elements
 const authForm = document.getElementById("auth-form");
 const authTitle = document.getElementById("auth-title");
 const authSubtitle = document.getElementById("auth-subtitle");
@@ -47,7 +54,8 @@ const onboardSpinner = document.getElementById("onboard-spinner");
 const closeAnalyticsBtn = document.getElementById("close-analytics-btn");
 const mailboxListBody = document.getElementById("mailbox-list-body");
 
-// Role Console Buttons
+// Role Console Buttons & Panels
+const consoleToggleContainer = document.getElementById("console-toggle-container");
 const toggleUserBtn = document.getElementById("toggle-user-btn");
 const toggleAdminBtn = document.getElementById("toggle-admin-btn");
 const userDashboardPanel = document.getElementById("user-dashboard-panel");
@@ -72,25 +80,66 @@ document.addEventListener("DOMContentLoaded", () => {
         fetchDashboardData();
         connectSSEStream();
     } else {
-        showView("auth");
+        showView("landing");
     }
 });
 
-// View Navigation Handler
+// Decode user role from JWT token
+function getRoleFromToken(t) {
+    try {
+        const base64Url = t.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        const decoded = JSON.parse(jsonPayload);
+        return decoded.role || "user";
+    } catch(e) {
+        return "user";
+    }
+}
+
+// View Navigation Handler (Landing Page router)
 function showView(viewName) {
     currentView = viewName;
-    if (viewName === "dashboard") {
-        authView.classList.remove("active");
+    
+    // Deactivate all views first
+    landingView.classList.remove("active");
+    authView.classList.remove("active");
+    dashboardView.classList.remove("active");
+    
+    if (viewName === "landing") {
+        landingView.classList.add("active");
+    } else if (viewName === "auth") {
+        authView.classList.add("active");
+    } else if (viewName === "dashboard") {
         dashboardView.classList.add("active");
         userEmailDisplay.textContent = userEmail;
-    } else {
-        dashboardView.classList.remove("active");
-        authView.classList.add("active");
+        
+        // SECURE ROLE GATE: Only administrators see the Admin Radar toggle options
+        const userRole = getRoleFromToken(token);
+        console.log(`[AUTH GAUNTLET] User identity resolved. Assigned Role: ${userRole}`);
+        
+        if (userRole === "admin") {
+             consoleToggleContainer.style.display = "flex";
+        } else {
+             // Standard users are hard-locked into the User View panel
+             consoleToggleContainer.style.display = "none";
+             toggleUserBtn.classList.add("active");
+             toggleAdminBtn.classList.remove("active");
+             userDashboardPanel.classList.remove("hidden");
+             adminDashboardPanel.classList.add("hidden");
+        }
     }
 }
 
 // Event Listeners Setup
 function setupEventListeners() {
+    // Landing navigation routes
+    landingLoginBtn.addEventListener("click", () => showView("auth"));
+    landingCtaBtn.addEventListener("click", () => showView("auth"));
+    backToLanding.addEventListener("click", () => showView("landing"));
+
     // Auth Mode Toggle
     authToggleLink.addEventListener("click", (e) => {
         e.preventDefault();
@@ -189,7 +238,7 @@ function setupEventListeners() {
             sseSource.close();
             sseSource = null;
         }
-        showView("auth");
+        showView("landing");
         authEmail.value = "";
         authPassword.value = "";
     });
@@ -215,7 +264,7 @@ function setupEventListeners() {
         });
     });
 
-    // Onboard Form Submission (Task 2: UI overlay validation handshakes)
+    // Onboard Form Submission
     onboardForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
@@ -278,7 +327,7 @@ function setupEventListeners() {
     });
 }
 
-// Low-latency Event Telemetry SSE Stream (Task 1)
+// Low-latency Event Telemetry SSE Stream
 function connectSSEStream() {
     if (sseSource) {
          sseSource.close();
@@ -299,15 +348,16 @@ function connectSSEStream() {
               statHealthFill.style.width = `${data.metrics.inbox_placement_rate}%`;
          }
          
-         // 2. Admin System radar telemetry
-         if (data.system_radar) {
+         // 2. Admin System radar telemetry (Only update elements if they exist in DOM and role is admin)
+         const userRole = getRoleFromToken(token);
+         if (userRole === "admin" && data.system_radar) {
               document.getElementById("admin-redis-backlog").textContent = `${data.system_radar.redis_backlog} Tasks Pending`;
               document.getElementById("admin-gemma-speed").textContent = `${data.system_radar.inference_speed} Tokens/Sec`;
               document.getElementById("admin-temp").textContent = `${data.system_radar.hardware_temp}°C`;
          }
          
          // 3. Append to admin operations log stream table
-         if (data.new_log) {
+         if (userRole === "admin" && data.new_log) {
               appendAdminLogStream(data.new_log);
          }
     };
@@ -457,7 +507,6 @@ function renderMailboxesTable(mailboxes) {
         
         const toggleCheckbox = tr.querySelector("input[type='checkbox']");
         toggleCheckbox.addEventListener("change", async () => {
-             // Task 3: Apply visual loading blur overlay while API request processes
              tr.style.filter = "blur(1px)";
              tr.style.opacity = "0.7";
              

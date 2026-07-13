@@ -14,10 +14,58 @@
 </head>
 <body>
     <div id="app">
+        <!-- ==================== PUBLIC LANDING PAGE VIEW ==================== -->
+        <div id="landing-view" class="view active">
+            <div class="landing-view-container">
+                <!-- Navigation -->
+                <nav class="landing-nav">
+                    <div class="header-brand">
+                        <i class="fa-solid fa-fire-flame-curved brand-icon"></i>
+                        <span>SwarmWarm</span>
+                    </div>
+                    <button id="landing-login-btn" class="btn btn-outline btn-sm">Sign In</button>
+                </nav>
+
+                <!-- Hero Section -->
+                <header class="landing-hero">
+                    <div class="hero-glow"></div>
+                    <h1>Consensus Peer-to-Peer<br>Email Warmup Swarm</h1>
+                    <p>Automate SMTP & IMAP inbox warmup exchanges across isolated sender fleets. Utilizes localized Gemma LLM models to simulate natural B2B interactions and recover sender domain reputation organically.</p>
+                    <button id="landing-cta-btn" class="btn btn-primary" style="font-size: 1.1rem; padding: 14px 28px;">
+                        <span>Access Warmup Dashboard</span>
+                        <i class="fa-solid fa-rocket"></i>
+                    </button>
+                </header>
+
+                <!-- Features Grid -->
+                <section class="features-grid-landing">
+                    <div class="feature-card-landing">
+                        <div class="icon-box"><i class="fa-solid fa-network-wired"></i></div>
+                        <h3>P2P Warmup Network</h3>
+                        <p>Automatically match mailboxes inside the swarm using a bipartite directed graph scheduling algorithm to maximize cross-provider coverage.</p>
+                    </div>
+                    <div class="feature-card-landing">
+                        <div class="icon-box"><i class="fa-solid fa-brain"></i></div>
+                        <h3>Local Gemma 4B AI</h3>
+                        <p>Simulates contextual replies, automatic RFC threading headers (In-Reply-To), and natural language topics over reverse-proxy tunnels.</p>
+                    </div>
+                    <div class="feature-card-landing">
+                        <div class="icon-box"><i class="fa-solid fa-lock"></i></div>
+                        <h3>Symmetric GCM Encryption</h3>
+                        <p>Your SMTP and IMAP passwords are never saved in plaintext. AES-256-GCM symmetric byte encryption secures all credentials locally.</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+
         <!-- ==================== SESSION GATEWAY VIEW ==================== -->
-        <div id="auth-view" class="view active">
+        <div id="auth-view" class="view">
             <div class="auth-container">
                 <div class="auth-card">
+                    <div class="back-to-landing-link" id="back-to-landing">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Back to Home</span>
+                    </div>
                     <div class="auth-header">
                         <div class="logo">
                             <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
