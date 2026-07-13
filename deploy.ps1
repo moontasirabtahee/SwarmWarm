@@ -24,4 +24,7 @@ ssh root@$vpsIp "cd /root/SwarmWarm && source venv/bin/activate && nohup uvicorn
 ssh root@$vpsIp "cd /root/SwarmWarm && source venv/bin/activate && PYTHONPATH=. nohup celery -A app.core.celery_app worker --loglevel=info > celery.log 2>&1 &"
 
 Write-Host "`n[SUCCESS] Deployment complete! Dashboard running at http://srv1764813.hstgr.cloud/" -ForegroundColor Green
-Write-Host "To inspect live logs, SSH into VPS and run: tail -f /root/SwarmWarm/uvicorn.log" -ForegroundColor Gray
+
+# 4. Stream live logs
+Write-Host "`n[LOGS] Streaming live VPS application logs (Press Ctrl+C to disconnect tail)..." -ForegroundColor Cyan
+ssh root@$vpsIp -t "tail -f /root/SwarmWarm/uvicorn.log /root/SwarmWarm/celery.log"
