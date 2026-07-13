@@ -4,7 +4,7 @@ import logging
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from app.api.auth import get_current_user, TokenData
-from app.core.db import INTERACTION_LOGS, MAILBOXES
+from app.core.db import list_all_interaction_logs, list_interaction_logs_by_user
 
 logger = logging.getLogger("swarmwarm.stream")
 router = APIRouter(prefix="/api/v1/analytics", tags=["Real-Time Streams"])
@@ -14,19 +14,18 @@ async def event_generator(user_id: str, is_admin: bool):
     Yields real-time Server-Sent Events (SSE) detailing database log changes
     and system status telemetry configurations.
     """
-    last_seen_count = 0
+    last_seen_count = -1
     
     while True:
         try:
-            current_logs = list(INTERACTION_LOGS)
-            current_count = len(current_logs)
-            
             # Filter logs based on role scope (admin sees all, user sees isolated)
             if is_admin:
-                filtered_logs = current_logs
+                filtered_logs = list_all_interaction_logs()
             else:
-                filtered_logs = [log for log in current_logs if log["user_id"] == user_id]
+                filtered_logs = list_interaction_logs_by_user(user_id)
                 
+            current_count = len(filtered_logs)
+            
             # If database changes, calculate and dispatch update event
             if current_count != last_seen_count:
                 last_seen_count = current_count
@@ -73,8 +72,8 @@ async def event_generator(user_id: str, is_admin: bool):
                           "inbox_placement_rate": placement_rate
                      },
                      "system_radar": system_radar,
-                     # Return only the last log to append in real-time
-                     "new_log": filtered_logs[-1] if filtered_logs else None
+                     # Return only the last log (which is first in a DESC sorted list) to append in real-time
+                     "new_log": filtered_logs[0] if filtered_logs else None
                 }
                 
                 yield f"data: {json.dumps(payload)}\n\n"

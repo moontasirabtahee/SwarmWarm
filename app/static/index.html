@@ -137,13 +137,13 @@
         <!-- ==================== CONTROL CENTER WORKSPACE VIEW ==================== -->
         <div id="dashboard-view" class="view" style="display: flex; min-height: 100vh;">
             <!-- Left Sidebar Navigation & Stats -->
-            <aside class="dashboard-sidebar" style="width: 320px; min-width: 320px; background: #131824; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 24px; position: sticky; top: 0; height: 100vh; overflow-y: auto; z-index: 90;">
-                <div class="logo" style="justify-content: flex-start; margin-bottom: 24px;">
+            <aside class="dashboard-sidebar" style="width: 320px; min-width: 320px; background: #131824; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 16px 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; z-index: 90;">
+                <div class="logo" style="justify-content: flex-start; margin-bottom: 16px;">
                     <i class="fa-solid fa-fire-flame-curved logo-icon" style="color: var(--color-primary); filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.4));"></i>
                     <span style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; color: #FFF; margin-left: 8px;">SwarmWarm</span>
                 </div>
                 
-                <div class="console-toggle" id="console-toggle-container" style="display: flex; gap: 8px; margin-bottom: 32px;">
+                <div class="console-toggle" id="console-toggle-container" style="display: flex; gap: 8px; margin-bottom: 20px;">
                     <button id="toggle-user-btn" class="btn btn-sm btn-outline active" style="flex: 1; border-color: var(--color-primary);">User View</button>
                     <button id="toggle-admin-btn" class="btn btn-sm btn-outline" style="flex: 1;">Admin Radar</button>
                 </div>
@@ -197,7 +197,7 @@
             <!-- Right Main Area -->
             <div style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; height: 100vh;">
                 <!-- Main Header (User state and actions) -->
-                <header class="app-header" style="background: var(--bg-surface-glass); border-bottom: 1px solid var(--border-color); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 80;">
+                <header class="app-header" style="background: var(--bg-surface-glass); border-bottom: 1px solid var(--border-color); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 80;">
                     <div style="font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: #FFF;">
                         Workspace Fleet Command
                     </div>
@@ -214,11 +214,11 @@
                 </header>
 
                 <!-- Workspace Panels -->
-                <main class="dashboard-content" style="padding: 32px; flex-grow: 1;">
+                <main class="dashboard-content" style="padding: 20px 24px; flex-grow: 1;">
                     <!-- ==================== USER MAIN WORKSPACE ==================== -->
                     <div id="user-dashboard-panel">
                         <!-- Mailbox Fleet Command -->
-                        <section class="fleet-section" style="background: var(--bg-surface-glass); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px;">
+                        <section class="fleet-section" style="background: var(--bg-surface-glass); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
                             <div class="fleet-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                                 <div class="title-block">
                                     <h2 style="font-size: 1.3rem; font-weight: 700; color: #FFF; margin-bottom: 4px;">Mailbox Fleet</h2>

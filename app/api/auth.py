@@ -11,7 +11,7 @@ from app.core.config import JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_M
 
 logger = logging.getLogger("swarmwarm.auth")
 
-from app.core.db import USERS
+from app.core.db import get_user_by_email, create_user
 
 # Password hashing configuration
 pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
@@ -92,41 +92,35 @@ async def get_current_user(request: Request) -> TokenData:
 
 # API Endpoints
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(payload: UserSignupRequest):
     """
     Registers a new tenant account, hashing raw passwords.
     """
     email_clean = payload.email.lower()
-    if email_clean in USERS:
+    existing_user = get_user_by_email(email_clean)
+    if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Account with this email already exists."
         )
         
     hashed_pwd = get_password_hash(payload.password)
-    # Generate mock UUID string matching user index
-    user_uuid = f"user_{len(USERS) + 1}"
-    
     role = "admin" if email_clean == "ieee.dobby1998@gmail.com" else "user"
-    user_record = {
-        "id": user_uuid,
-        "email": email_clean,
-        "password_hash": hashed_pwd,
-        "role": role
-    }
     
-    USERS[email_clean] = user_record
-    logger.info(f"New user registered: {email_clean} (ID: {user_uuid}, Role: {role})")
+    user_record = create_user(email=email_clean, password_hash=hashed_pwd, role=role)
+    logger.info(f"New user registered: {email_clean} (ID: {user_record['id']}, Role: {role})")
     
-    return UserResponse(id=user_uuid, email=email_clean, role=role)
+    return UserResponse(id=user_record["id"], email=email_clean, role=role)
 
 @router.post("/token", response_model=Token)
+@router.post("/login", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Authenticates email credentials and issues secure JWT bearer tokens.
     """
     email_clean = form_data.username.lower()
-    user = USERS.get(email_clean)
+    user = get_user_by_email(email_clean)
     if not user or not verify_password(form_data.password, user["password_hash"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

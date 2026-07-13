@@ -2,17 +2,27 @@ import logging
 import random
 import networkx as nx
 from app.workers.tasks import execute_smtp_send_task, execute_imap_rescue_task
+from app.core.db import create_system_log, list_all_mailboxes
 
 logger = logging.getLogger("swarmwarm.scheduler")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
-def generate_daily_swarm_graph(mailboxes: list, history_matches: set = None) -> list:
+def generate_daily_swarm_graph(mailboxes: list = None, history_matches: set = None) -> list:
     """
     Executes bipartite graph matching calculations to generate safe P2P pairs.
     Enforces multi-tenant isolation shields and minimizes duplicate matches.
+    If no mailboxes are provided, they are loaded directly from the database.
     """
     logger.info("Starting daily P2P swarm graph allocation calculation...")
+    create_system_log(
+        module="CELERY_BEAT",
+        event="Nightly P2P bipartite graph mapping started."
+    )
     
+    if not mailboxes:
+        logger.info("No mailbox list provided. Loading active nodes from SQLite database...")
+        mailboxes = list_all_mailboxes()
+        
     if history_matches is None:
         history_matches = set()
         
@@ -37,7 +47,7 @@ def generate_daily_swarm_graph(mailboxes: list, history_matches: set = None) -> 
             # Block self-sending and root domain matches
             if s["email"] == r["email"]:
                 continue
-            
+                
             s_domain = s["email"].split('@')[-1]
             r_domain = r["email"].split('@')[-1]
             if s_domain == r_domain:
@@ -72,7 +82,7 @@ def generate_daily_swarm_graph(mailboxes: list, history_matches: set = None) -> 
             sender_node = s
             recipient_node = next(r for r in recipients if r["email"] == target_email)
             
-            # Explicit Multi-Tenant Shield Validation assertion check (Task 3.2.2)
+            # Explicit Multi-Tenant Shield Validation assertion check
             assert sender_node["user_id"] != recipient_node["user_id"], \
                 f"Multi-Tenant Shield Violated: {sender_node['email']} and {recipient_node['email']} share user_id {sender_node['user_id']}"
                 
@@ -85,6 +95,10 @@ def generate_daily_swarm_graph(mailboxes: list, history_matches: set = None) -> 
             received_counts[target_email] += 1
             
     logger.info(f"Bipartite graph matches calculated. Total pairs: {len(matches)}")
+    create_system_log(
+        module="CELERY_BEAT",
+        event=f"Nightly P2P bipartite graph mapping complete. Calculated {len(matches)} pairs."
+    )
     return matches
 
 def dispatch_daily_tasks(matches: list):
@@ -122,4 +136,8 @@ def dispatch_daily_tasks(matches: list):
             countdown=task_delay + 900
         )
         
+    create_system_log(
+        module="REDIS_BROKER",
+        event=f"Enqueued {len(matches) * 2} task items into FIFO channel buffer."
+    )
     logger.info("All daily warmup tasks successfully enqueued to Celery broker.")

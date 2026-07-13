@@ -324,6 +324,7 @@ function setupEventListeners() {
         toggleUserBtn.style.borderColor = "transparent";
         adminDashboardPanel.classList.remove("hidden");
         userDashboardPanel.classList.add("hidden");
+        fetchAdminLogs();
     });
 }
 
@@ -356,7 +357,7 @@ function connectSSEStream() {
               document.getElementById("admin-temp").textContent = `${data.system_radar.hardware_temp}°C`;
          }
          
-         // 3. Append to admin operations log stream table
+         // 3. Append to admin operations log stream table if we are in admin view
          if (userRole === "admin" && data.new_log) {
               appendAdminLogStream(data.new_log);
          }
@@ -367,7 +368,44 @@ function connectSSEStream() {
     };
 }
 
-// Append new operations to admin log ledger table
+// Fetch global system logs from backend for admin radar table
+async function fetchAdminLogs() {
+    try {
+        const response = await fetch("/api/v1/admin/system/logs", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (response.ok) {
+            const logs = await response.json();
+            adminLogStreamBody.innerHTML = "";
+            if (logs.length === 0) {
+                adminLogStreamBody.innerHTML = `<tr><td colspan="5" class="table-empty">No background system audit logs found.</td></tr>`;
+                return;
+            }
+            logs.forEach(log => {
+                const tr = document.createElement("tr");
+                let levelTag = "status-success";
+                if (log.level === "ERROR") {
+                     levelTag = "status-red";
+                } else if (log.level === "WARN") {
+                     levelTag = "status-rescued";
+                }
+                tr.innerHTML = `
+                    <td><code>${log.timestamp}</code></td>
+                    <td><code>global_swarm</code></td>
+                    <td><span class="status-tag status-sent">${log.module}</span></td>
+                    <td>${log.event}</td>
+                    <td><span class="status-tag ${levelTag}">${log.level}</span></td>
+                `;
+                adminLogStreamBody.appendChild(tr);
+            });
+            isFirstAdminLog = false;
+        }
+    } catch (err) {
+         console.error("Failed to load admin system logs:", err);
+    }
+}
+
+// Append new operations to admin log ledger table in real time
 function appendAdminLogStream(log) {
     if (isFirstAdminLog) {
          adminLogStreamBody.innerHTML = "";
@@ -381,7 +419,6 @@ function appendAdminLogStream(log) {
          actionTag = "status-rescued";
     }
     
-    // Clean formatted time
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
     tr.innerHTML = `
@@ -392,10 +429,8 @@ function appendAdminLogStream(log) {
         <td><span class="status-tag ${actionTag}">${log.action.toUpperCase()}</span></td>
     `;
     
-    // Insert new events at the top
     adminLogStreamBody.insertBefore(tr, adminLogStreamBody.firstChild);
     
-    // Keep list lightweight
     if (adminLogStreamBody.children.length > 20) {
          adminLogStreamBody.removeChild(adminLogStreamBody.lastChild);
     }
@@ -483,7 +518,7 @@ function renderMailboxesTable(mailboxes) {
         const tr = document.createElement("tr");
         
         tr.addEventListener("click", (e) => {
-             if (e.target.closest(".switch") || e.target.closest("input")) return;
+             if (e.target.closest(".switch") || e.target.closest("input") || e.target.closest(".btn-delete")) return;
              openAnalyticsModal(m);
         });
         
@@ -498,10 +533,15 @@ function renderMailboxesTable(mailboxes) {
                 </span>
             </td>
             <td class="text-right">
-                <label class="switch">
-                    <input type="checkbox" ${m.is_active ? 'checked' : ''} data-id="${m.id}">
-                    <span class="slider"></span>
-                </label>
+                <div class="mailbox-actions-cell">
+                    <label class="switch">
+                        <input type="checkbox" ${m.is_active ? 'checked' : ''} data-id="${m.id}">
+                        <span class="slider"></span>
+                    </label>
+                    <button class="btn-delete" data-id="${m.id}" title="Remove Mailbox">
+                        <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                </div>
             </td>
         `;
         
@@ -528,12 +568,37 @@ function renderMailboxesTable(mailboxes) {
              }
         });
         
+        const deleteBtn = tr.querySelector(".btn-delete");
+        deleteBtn.addEventListener("click", async (e) => {
+             e.stopPropagation();
+             if (!confirm(`Are you sure you want to remove mailbox ${m.email} from the P2P swarm?`)) {
+                  return;
+             }
+             tr.style.filter = "blur(1px)";
+             tr.style.opacity = "0.7";
+             
+             try {
+                  const deleteRes = await fetch(`/api/v1/mailboxes/${m.id}`, {
+                       method: "DELETE",
+                       headers: { "Authorization": `Bearer ${token}` }
+                  });
+                  if (!deleteRes.ok) {
+                       throw new Error("Delete mailbox failed.");
+                  }
+                  fetchDashboardData();
+             } catch (err) {
+                  alert(err.message);
+                  tr.style.filter = "none";
+                  tr.style.opacity = "1";
+             }
+        });
+        
         mailboxListBody.appendChild(tr);
     });
 }
 
 // Open deep analytics panel
-function openAnalyticsModal(mailbox) {
+async function openAnalyticsModal(mailbox) {
     analyticsModal.classList.add("active");
     
     document.getElementById("node-details-email").textContent = mailbox.email;
@@ -546,47 +611,59 @@ function openAnalyticsModal(mailbox) {
     document.getElementById("node-ramp-fill").style.width = `${progressPercent}%`;
     
     const logsBody = document.getElementById("node-logs-body");
+    logsBody.innerHTML = `
+        <tr>
+            <td colspan="5" class="table-empty">
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                <p>Loading activity ledger...</p>
+            </td>
+        </tr>
+    `;
     
-    if (mailbox.id === "mailbox_google_1") {
-        logsBody.innerHTML = `
-            <tr>
-                <td>2026-07-12 10:00</td>
-                <td><span class="status-tag status-sent">OUTBOUND SEND</span></td>
-                <td>m.abtahee@brownmafia.com</td>
-                <td><i class="fa-solid fa-check text-google"></i> Yes</td>
-                <td><span class="status-tag status-success">DELIVERED</span></td>
-            </tr>
-            <tr>
-                <td>2026-07-12 12:00</td>
-                <td><span class="status-tag status-sent">OUTBOUND SEND</span></td>
-                <td>node01@mabsj.com</td>
-                <td><i class="fa-solid fa-check text-google"></i> Yes</td>
-                <td><span class="status-tag status-success">DELIVERED</span></td>
-            </tr>
-            <tr>
-                <td>2026-07-12 14:00</td>
-                <td><span class="status-tag status-rescued">SPAM RESCUE</span></td>
-                <td>outreach@startup.net</td>
-                <td><i class="fa-solid fa-times text-muted"></i> No</td>
-                <td><span class="status-tag status-success">RESCUED</span></td>
-            </tr>
-        `;
-    } else if (mailbox.id === "mailbox_microsoft_1") {
-         logsBody.innerHTML = `
-            <tr>
-                <td>2026-07-12 11:00</td>
-                <td><span class="status-tag status-sent">OUTBOUND SEND</span></td>
-                <td>abtahee@qoarc.com</td>
-                <td><i class="fa-solid fa-check text-google"></i> Yes</td>
-                <td><span class="status-tag status-success">DELIVERED</span></td>
-            </tr>
-         `;
-    } else {
-         logsBody.innerHTML = `
-             <tr>
-                 <td colspan="5" class="table-empty">No activity logs recorded. Warmup loops schedule nightly.</td>
-             </tr>
-         `;
+    try {
+        const response = await fetch(`/api/v1/mailboxes/${mailbox.id}/logs`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (response.ok) {
+            const logs = await response.json();
+            if (logs.length === 0) {
+                logsBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="table-empty">No activity logs recorded. Warmup loops schedule nightly.</td>
+                    </tr>
+                `;
+                return;
+            }
+            logsBody.innerHTML = "";
+            logs.forEach(log => {
+                const tr = document.createElement("tr");
+                
+                // Format timestamp
+                let dateStr = "Recent";
+                if (log.created_at) {
+                    try {
+                        const dt = new Date(log.created_at);
+                        dateStr = dt.toISOString().slice(0,10) + " " + dt.toTimeString().slice(0,5);
+                    } catch(e) {}
+                }
+                
+                const actionTag = log.action === "sent" ? "OUTBOUND SEND" : "SPAM RESCUE";
+                const actionClass = log.action === "sent" ? "status-sent" : "status-rescued";
+                
+                tr.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td><span class="status-tag ${actionClass}">${actionTag}</span></td>
+                    <td>${log.recipient_email || 'inbox@domain.com'}</td>
+                    <td><i class="fa-solid ${log.ai_replied ? 'fa-check text-google' : 'fa-xmark text-muted'}"></i> ${log.ai_replied ? 'Yes' : 'No'}</td>
+                    <td><span class="status-tag status-success">${log.action === "sent" ? "DELIVERED" : "RESCUED"}</span></td>
+                `;
+                logsBody.appendChild(tr);
+            });
+        } else {
+             logsBody.innerHTML = `<tr><td colspan="5" class="table-empty">Failed to load database logs.</td></tr>`;
+        }
+    } catch(err) {
+         logsBody.innerHTML = `<tr><td colspan="5" class="table-empty">Failed to query ledger: ${err.message}</td></tr>`;
     }
 }
 

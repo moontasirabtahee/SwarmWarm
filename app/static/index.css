@@ -884,7 +884,7 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 24px 0;
+    padding: 12px 0;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -893,7 +893,7 @@ input:checked + .slider:before {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 100px 24px 60px 24px;
+    padding: 40px 24px 30px 24px;
     position: relative;
 }
 
@@ -1004,4 +1004,33 @@ input:checked + .slider:before {
         border-right: none !important;
         border-bottom: 1px solid var(--border-color) !important;
     }
+}
+
+/* Mailbox Actions & Delete styles */
+.mailbox-actions-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-delete {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.05rem;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+}
+
+.btn-delete:hover {
+    color: var(--color-red);
+    background-color: rgba(239, 68, 68, 0.1);
+    transform: scale(1.1);
 }

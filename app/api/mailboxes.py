@@ -1,11 +1,18 @@
 import socket
 import logging
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from app.api.auth import get_current_user, TokenData
 from app.schemas.mailbox import MailboxOnboardRequest, MailboxResponse
 from app.core.security import encrypt_token
-from app.core.db import MAILBOXES
+from app.core.db import (
+    create_mailbox,
+    list_mailboxes_by_user,
+    get_mailbox_by_id,
+    update_mailbox_active_state,
+    delete_mailbox,
+    list_interaction_logs_by_mailbox
+)
 
 logger = logging.getLogger("swarmwarm.mailboxes")
 router = APIRouter(prefix="/api/v1/mailboxes", tags=["Mailbox Fleet Controls"])
@@ -50,24 +57,25 @@ async def onboard_mailbox(payload: MailboxOnboardRequest, current_user: TokenDat
          )
          
     # 3. Create database record linked to current user
-    mailbox_id = f"mailbox_{len(MAILBOXES) + 1}"
-    record = {
-        "id": mailbox_id,
-        "user_id": current_user.user_id,
-        "email": payload.email,
-        "smtp_host": payload.smtp_host,
-        "smtp_port": payload.smtp_port,
-        "imap_host": payload.imap_host,
-        "imap_port": payload.imap_port,
-        "provider": payload.provider,
-        "use_ssl": payload.use_ssl,
-        "is_active": True,
-        "encrypted_password": encrypted_pass
-    }
-    
-    MAILBOXES[mailbox_id] = record
-    logger.info(f"Onboarded new mailbox: {payload.email} (ID: {mailbox_id}) under User: {current_user.user_id}")
-    
+    try:
+        record = create_mailbox(
+            user_id=current_user.user_id,
+            email=payload.email,
+            smtp_host=payload.smtp_host,
+            smtp_port=payload.smtp_port,
+            imap_host=payload.imap_host,
+            imap_port=payload.imap_port,
+            provider=payload.provider,
+            use_ssl=payload.use_ssl,
+            encrypted_password=encrypted_pass
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Database onboarding failed: {e}"
+        )
+        
+    logger.info(f"Onboarded new mailbox: {payload.email} (ID: {record['id']}) under User: {current_user.user_id}")
     return MailboxResponse(**record)
 
 @router.get("", response_model=List[MailboxResponse])
@@ -75,19 +83,17 @@ async def list_mailboxes(current_user: TokenData = Depends(get_current_user)):
     """
     Lists all mailboxes belonging exclusively to the authenticated tenant context.
     """
-    # Fleet Isolation filter: .eq("user_id", current_user.user_id)
-    user_mailboxes = [
-        MailboxResponse(**m) for m in MAILBOXES.values() if m["user_id"] == current_user.user_id
-    ]
+    mailboxes_data = list_mailboxes_by_user(current_user.user_id)
+    user_mailboxes = [MailboxResponse(**m) for m in mailboxes_data]
     logger.info(f"Fetched {len(user_mailboxes)} mailboxes for user {current_user.user_id}")
     return user_mailboxes
 
-@router.patch("/{id}/toggle", response_model=MailboxResponse)
-async def toggle_mailbox(id: str, current_user: TokenData = Depends(get_current_user)):
+@router.get("/{id}", response_model=MailboxResponse)
+async def get_mailbox(id: str, current_user: TokenData = Depends(get_current_user)):
     """
-    Toggles the active state of an inbox, pausing or resuming it from the swarm.
+    Retrieves details of a specific owned mailbox.
     """
-    mailbox = MAILBOXES.get(id)
+    mailbox = get_mailbox_by_id(id)
     if not mailbox:
          raise HTTPException(
              status_code=status.HTTP_404_NOT_FOUND,
@@ -95,13 +101,80 @@ async def toggle_mailbox(id: str, current_user: TokenData = Depends(get_current_
          )
          
     # Enforce multi-tenant access control boundaries
-    if mailbox["user_id"] != current_user.user_id:
+    if mailbox["user_id"] != current_user.user_id and current_user.role != "admin":
+         raise HTTPException(
+             status_code=status.HTTP_403_FORBIDDEN,
+             detail="Access denied: You do not own this mailbox."
+         )
+    return MailboxResponse(**mailbox)
+
+@router.patch("/{id}/toggle", response_model=MailboxResponse)
+@router.patch("/{id}/state", response_model=MailboxResponse)
+async def toggle_mailbox(id: str, current_user: TokenData = Depends(get_current_user)):
+    """
+    Toggles the active state of an inbox, pausing or resuming it from the swarm.
+    """
+    mailbox = get_mailbox_by_id(id)
+    if not mailbox:
+         raise HTTPException(
+             status_code=status.HTTP_404_NOT_FOUND,
+             detail="Mailbox record not found."
+         )
+         
+    # Enforce multi-tenant access control boundaries
+    if mailbox["user_id"] != current_user.user_id and current_user.role != "admin":
          raise HTTPException(
              status_code=status.HTTP_403_FORBIDDEN,
              detail="Access denied: You do not own this mailbox."
          )
          
-    # Toggle state
-    mailbox["is_active"] = not mailbox["is_active"]
-    logger.info(f"Mailbox {id} active state toggled to: {mailbox['is_active']}")
+    new_state = not mailbox["is_active"]
+    update_mailbox_active_state(id, new_state)
+    mailbox["is_active"] = new_state
+    logger.info(f"Mailbox {id} active state toggled to: {new_state}")
     return MailboxResponse(**mailbox)
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_mailbox(id: str, current_user: TokenData = Depends(get_current_user)):
+    """
+    Decouples mailbox asset from the P2P swarm and clears database associations.
+    """
+    mailbox = get_mailbox_by_id(id)
+    if not mailbox:
+         raise HTTPException(
+             status_code=status.HTTP_404_NOT_FOUND,
+             detail="Mailbox record not found."
+         )
+         
+    # Enforce multi-tenant access control boundaries
+    if mailbox["user_id"] != current_user.user_id and current_user.role != "admin":
+         raise HTTPException(
+             status_code=status.HTTP_403_FORBIDDEN,
+             detail="Access denied: You do not own this mailbox."
+         )
+         
+    delete_mailbox(id)
+    logger.info(f"Successfully deleted mailbox: {id}")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.get("/{id}/logs")
+async def get_mailbox_logs(id: str, current_user: TokenData = Depends(get_current_user)):
+    """
+    Retrieves all interaction logs for a specific mailbox owned by the user.
+    """
+    mailbox = get_mailbox_by_id(id)
+    if not mailbox:
+         raise HTTPException(
+             status_code=status.HTTP_404_NOT_FOUND,
+             detail="Mailbox record not found."
+         )
+         
+    # Enforce multi-tenant access control boundaries
+    if mailbox["user_id"] != current_user.user_id and current_user.role != "admin":
+         raise HTTPException(
+             status_code=status.HTTP_403_FORBIDDEN,
+             detail="Access denied: You do not own this mailbox."
+         )
+         
+    logs = list_interaction_logs_by_mailbox(id)
+    return logs

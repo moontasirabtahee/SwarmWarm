@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from app.api import auth, mailboxes, analytics, stream
+from app.api import auth, mailboxes, analytics, stream, admin
 
 app = FastAPI(
     title="SwarmWarm REST API Gateway",
@@ -29,7 +29,9 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(mailboxes.router)
 app.include_router(analytics.router)
+app.include_router(analytics.dashboard_router)
 app.include_router(stream.router)
+app.include_router(admin.router)
 
 # Mount static folder
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
