@@ -990,3 +990,18 @@ input:checked + .slider:before {
 .back-to-landing-link:hover {
     color: var(--color-primary);
 }
+
+/* Sidebar Responsive Collapsing Overrides */
+@media (max-width: 992px) {
+    #dashboard-view {
+        flex-direction: column !important;
+    }
+    .dashboard-sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        height: auto !important;
+        position: static !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+}

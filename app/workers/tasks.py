@@ -56,10 +56,10 @@ def execute_smtp_send_task(self, sender_mailbox_id: str, recipient_email: str):
         ai_service = AIService()
         try:
              ai_payload = asyncio.run(ai_service.generate_thread_starter())
-             body_text = ai_payload.get("body", "Default backup warmup content.")
+             body_text = ai_payload.get("body") or ai_service.get_fallback_starter()
         except Exception as ai_err:
              logger.warning(f"Local AI inference tunnel failed: {ai_err}. Falling back to default baseline text.")
-             body_text = "Checking in to see if we are scheduled for the database schema review this week."
+             body_text = ai_service.get_fallback_starter()
              
         # 2. Dispatch SMTP warmup using verified outbound module
         result = send_warmup_email(config, recipient_email, "Warmup Sync Request", body_text)
@@ -124,9 +124,11 @@ def execute_imap_rescue_task(self, mailbox_id: str, expected_message_id: str):
              # Generate smart reply
              try:
                   reply_text = asyncio.run(ai_service.generate_thread_reply(incoming_body))
+                  if not reply_text:
+                       reply_text = ai_service.get_fallback_reply()
              except Exception as ai_err:
                   logger.warning(f"AI Smart Reply generation failed: {ai_err}. Using generic confirmation template.")
-                  reply_text = "I received your update and will review it shortly."
+                  reply_text = ai_service.get_fallback_reply()
                   
              # Build SMTPConfig for current mailbox to send the reply back
              smtp_config = SMTPConfig(

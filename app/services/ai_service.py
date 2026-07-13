@@ -115,3 +115,29 @@ class AIService:
         sanitized = self.sanitize_output(raw_response)
         logger.info(f"AI Service: Contextual reply generated. Sanitized length: {len(sanitized)}")
         return sanitized
+
+    def get_fallback_starter(self) -> str:
+        """Returns a randomized fallback starter template."""
+        import random
+        starters = [
+            "Checking in to see if we are scheduled for the database schema review this week.",
+            "Let me know if you have received the draft budget audit proposals for Q3.",
+            "We need to schedule a quick walk-through of the system architecture changes.",
+            "Could you review the API integration guidelines before our sync tomorrow?",
+            "Just sent over the draft slides for the upcoming product planning review.",
+            "Please send over the updated server specs so we can calculate resource requirements."
+        ]
+        return random.choice(starters)
+
+    def get_fallback_reply(self) -> str:
+        """Returns a randomized fallback reply template."""
+        import random
+        replies = [
+            "I received your update and will review it shortly.",
+            "Thanks for the details. I will look into this and get back to you.",
+            "Understood. Let me sync with the team and circle back by tomorrow.",
+            "Looks good to me. I will follow up with you early next week.",
+            "Appreciate the follow-up. Let me check my calendar and schedule a meeting.",
+            "Noted. I'll read through the draft and send over my suggestions by EOD."
+        ]
+        return random.choice(replies)

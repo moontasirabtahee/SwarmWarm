@@ -29,9 +29,10 @@ async def onboard_mailbox(payload: MailboxOnboardRequest, current_user: TokenDat
     """
     Onboards a new mailbox, verifying network coordinates and encrypting app credentials.
     """
-    # 1. Port connectivity diagnostic validation checks
-    smtp_ok = check_port_connectivity(payload.smtp_host, payload.smtp_port)
-    imap_ok = check_port_connectivity(payload.imap_host, payload.imap_port)
+    # 1. Port connectivity diagnostic validation checks in background threads
+    import asyncio
+    smtp_ok = await asyncio.to_thread(check_port_connectivity, payload.smtp_host, payload.smtp_port)
+    imap_ok = await asyncio.to_thread(check_port_connectivity, payload.imap_host, payload.imap_port)
     
     if not smtp_ok or not imap_ok:
          raise HTTPException(

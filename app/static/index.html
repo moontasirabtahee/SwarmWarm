@@ -135,195 +135,199 @@
         </div>
 
         <!-- ==================== CONTROL CENTER WORKSPACE VIEW ==================== -->
-        <div id="dashboard-view" class="view">
-            <!-- App Header -->
-            <header class="app-header">
-                <div class="header-brand">
-                    <i class="fa-solid fa-fire-flame-curved brand-icon"></i>
-                    <span>SwarmWarm</span>
-                    <span class="badge badge-indigo">Control Plane</span>
+        <div id="dashboard-view" class="view" style="display: flex; min-height: 100vh;">
+            <!-- Left Sidebar Navigation & Stats -->
+            <aside class="dashboard-sidebar" style="width: 320px; min-width: 320px; background: #131824; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 24px; position: sticky; top: 0; height: 100vh; overflow-y: auto; z-index: 90;">
+                <div class="logo" style="justify-content: flex-start; margin-bottom: 24px;">
+                    <i class="fa-solid fa-fire-flame-curved logo-icon" style="color: var(--color-primary); filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.4));"></i>
+                    <span style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; color: #FFF; margin-left: 8px;">SwarmWarm</span>
                 </div>
                 
-                <div class="header-actions">
-                    <div class="console-toggle" id="console-toggle-container" style="display: flex; gap: 8px;">
-                        <button id="toggle-user-btn" class="btn btn-sm btn-outline active" style="border-color: var(--color-primary);">User View</button>
-                        <button id="toggle-admin-btn" class="btn btn-sm btn-outline">Admin Radar</button>
+                <div class="console-toggle" id="console-toggle-container" style="display: flex; gap: 8px; margin-bottom: 32px;">
+                    <button id="toggle-user-btn" class="btn btn-sm btn-outline active" style="flex: 1; border-color: var(--color-primary);">User View</button>
+                    <button id="toggle-admin-btn" class="btn btn-sm btn-outline" style="flex: 1;">Admin Radar</button>
+                </div>
+
+                <!-- Stats Widgets Inside Sidebar (Consolidates Gaps) -->
+                <div class="sidebar-widgets" style="display: flex; flex-direction: column; gap: 20px; flex-grow: 1;">
+                     <!-- Placement Health -->
+                     <div class="health-overview-card" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(255,255,255,0.01); margin-bottom: 0;">
+                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                             <h4 style="font-size: 0.85rem; color: var(--text-secondary);">Placement Health</h4>
+                             <span id="stat-health" style="font-weight: 700; color: var(--color-green);">100%</span>
+                         </div>
+                         <div class="health-bar-container" style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
+                             <div class="health-bar-fill" id="stat-health-fill" style="width: 100%; height: 100%; background: var(--color-green);"></div>
+                         </div>
+                         <span style="font-size: 0.75rem; color: var(--text-muted);">Targeting 95%+ placement rate</span>
+                     </div>
+
+                     <!-- Mini Stats cards -->
+                     <div style="display: flex; flex-direction: column; gap: 12px;">
+                         <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
+                             <i class="fa-solid fa-paper-plane" style="color: var(--color-blue); font-size: 1.1rem;"></i>
+                             <div>
+                                 <div style="font-size: 0.75rem; color: var(--text-muted);">Sends (24h)</div>
+                                 <div id="stat-sent" style="font-size: 1.2rem; font-weight: 700; color: #FFF;">0</div>
+                             </div>
+                         </div>
+                         <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
+                             <i class="fa-solid fa-shield-halved" style="color: var(--color-green); font-size: 1.1rem;"></i>
+                             <div>
+                                 <div style="font-size: 0.75rem; color: var(--text-muted);">Spam Rescues</div>
+                                 <div id="stat-rescued" style="font-size: 1.2rem; font-weight: 700; color: #FFF;">0</div>
+                             </div>
+                         </div>
+                         <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
+                             <i class="fa-solid fa-microchip" style="color: var(--color-primary); font-size: 1.1rem;"></i>
+                             <div>
+                                 <div style="font-size: 0.75rem; color: var(--text-muted);">AI Replies</div>
+                                 <div id="stat-ai" style="font-size: 1.2rem; font-weight: 700; color: #FFF;">0</div>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+
+                <!-- Footer details -->
+                <div class="sidebar-footer" style="font-size: 0.75rem; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: auto;">
+                    <span>SwarmWarm Node Agent v1.0</span>
+                </div>
+            </aside>
+
+            <!-- Right Main Area -->
+            <div style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; height: 100vh;">
+                <!-- Main Header (User state and actions) -->
+                <header class="app-header" style="background: var(--bg-surface-glass); border-bottom: 1px solid var(--border-color); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 80;">
+                    <div style="font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: #FFF;">
+                        Workspace Fleet Command
                     </div>
-                    <div class="user-profile">
-                        <div class="avatar">
-                            <i class="fa-solid fa-user-shield"></i>
+                    <div class="header-actions">
+                        <div class="user-profile">
+                            <div class="avatar"><i class="fa-solid fa-user-shield"></i></div>
+                            <span id="user-email-display">user@swarmwarm.io</span>
                         </div>
-                        <span id="user-email-display">user@swarmwarm.io</span>
+                        <button id="logout-btn" class="btn btn-outline btn-sm">
+                            <i class="fa-solid fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
                     </div>
-                    <button id="logout-btn" class="btn btn-outline btn-sm">
-                        <i class="fa-solid fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </button>
-                </div>
-            </header>
+                </header>
 
-            <main class="dashboard-content">
-                <!-- ==================== USER DASHBOARD PANEL ==================== -->
-                <div id="user-dashboard-panel">
-                    <!-- Macro Stats Section -->
-                    <section class="metrics-grid">
-                        <div class="metric-card glow-blue">
-                            <div class="metric-icon bg-blue">
-                                <i class="fa-solid fa-paper-plane"></i>
+                <!-- Workspace Panels -->
+                <main class="dashboard-content" style="padding: 32px; flex-grow: 1;">
+                    <!-- ==================== USER MAIN WORKSPACE ==================== -->
+                    <div id="user-dashboard-panel">
+                        <!-- Mailbox Fleet Command -->
+                        <section class="fleet-section" style="background: var(--bg-surface-glass); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px;">
+                            <div class="fleet-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <div class="title-block">
+                                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #FFF; margin-bottom: 4px;">Mailbox Fleet</h2>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary);">Manage and monitor inbox warmups</p>
+                                </div>
+                                <button id="add-mailbox-btn" class="btn btn-primary">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span>Onboard Mailbox</span>
+                                </button>
                             </div>
-                            <div class="metric-info">
-                                <h3>Dispatched Outbound</h3>
-                                <div class="metric-value" id="stat-sent">0</div>
-                                <p class="metric-subtext">Sent emails inside warmup network (24h)</p>
-                            </div>
-                        </div>
-                        
-                        <div class="metric-card glow-green">
-                            <div class="metric-icon bg-green">
-                                <i class="fa-solid fa-shield-halved"></i>
-                            </div>
-                            <div class="metric-info">
-                                <h3>Spam Rescues</h3>
-                                <div class="metric-value" id="stat-rescued">0</div>
-                                <p class="metric-subtext">Inbox placement recoveries (24h)</p>
-                            </div>
-                        </div>
-                        
-                        <div class="metric-card glow-indigo">
-                            <div class="metric-icon bg-indigo">
-                                <i class="fa-solid fa-microchip"></i>
-                            </div>
-                            <div class="metric-info">
-                                <h3>AI Responses</h3>
-                                <div class="metric-value" id="stat-ai">0</div>
-                                <p class="metric-subtext">Replies generated using Gemma 4B</p>
-                            </div>
-                        </div>
-                    </section>
 
-                    <!-- Placement Health Meter -->
-                    <section class="health-overview-card">
-                        <div class="health-header">
-                            <h2>Overall Placement Health</h2>
-                            <span class="health-percentage" id="stat-health">100%</span>
-                        </div>
-                        <div class="health-bar-container">
-                            <div class="health-bar-fill" id="stat-health-fill" style="width: 100%"></div>
-                        </div>
-                        <p class="health-meta-text">Targeting 95%+ for peak sender domain authority</p>
-                    </section>
+                            <div class="table-container">
+                                <table class="fleet-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Mailbox Address</th>
+                                            <th>Provider</th>
+                                            <th>SMTP Server</th>
+                                            <th>IMAP Server</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="mailbox-list-body">
+                                        <!-- Dynamic rows go here -->
+                                        <tr>
+                                            <td colspan="6" class="table-empty">
+                                                <i class="fa-solid fa-inbox"></i>
+                                                <p>No mailboxes onboarded yet. Connect your first inbox to join the swarm!</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
 
-                    <!-- Mailbox Fleet Command -->
-                    <section class="fleet-section">
-                        <div class="fleet-header">
-                            <div class="title-block">
-                                <h2>Mailbox Fleet</h2>
-                                <p>Manage and monitor inbox warmups</p>
+                    <!-- ==================== ADMIN MAIN WORKSPACE ==================== -->
+                    <div id="admin-dashboard-panel" class="hidden">
+                        <!-- Infrastructure Telemetry Grid -->
+                        <section class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                            <div class="metric-card glow-blue">
+                                <div class="metric-icon bg-blue" style="background-color: rgba(99, 102, 241, 0.1); color: var(--color-primary);">
+                                    <i class="fa-solid fa-database"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>Redis Queue Backlog</h3>
+                                    <div class="metric-value" id="admin-redis-backlog">0</div>
+                                    <p class="metric-subtext">Tasks pending in Celery broker</p>
+                                </div>
                             </div>
-                            <button id="add-mailbox-btn" class="btn btn-primary">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Onboard Mailbox</span>
-                            </button>
-                        </div>
+                            
+                            <div class="metric-card glow-green">
+                                <div class="metric-icon bg-green" style="background-color: rgba(16, 185, 129, 0.1); color: var(--color-green);">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>Gemma 4B Inference</h3>
+                                    <div class="metric-value" id="admin-gemma-speed">42.4</div>
+                                    <p class="metric-subtext">Tokens/sec processing speeds</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card glow-indigo">
+                                <div class="metric-icon bg-indigo" style="background-color: rgba(245, 158, 11, 0.1); color: var(--color-warning);">
+                                    <i class="fa-solid fa-temperature-three-quarters"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>Local Hardware Temp</h3>
+                                    <div class="metric-value" id="admin-temp">68°C</div>
+                                    <p class="metric-subtext">Inference engine GPU status</p>
+                                </div>
+                            </div>
+                        </section>
 
-                        <div class="table-container">
-                            <table class="fleet-table">
-                                <thead>
-                                    <tr>
-                                        <th>Mailbox Address</th>
-                                        <th>Provider</th>
-                                        <th>SMTP Server</th>
-                                        <th>IMAP Server</th>
-                                        <th>Status</th>
-                                        <th class="text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="mailbox-list-body">
-                                    <!-- Dynamic rows go here -->
-                                    <tr>
-                                        <td colspan="6" class="table-empty">
-                                            <i class="fa-solid fa-inbox"></i>
-                                            <p>No mailboxes onboarded yet. Connect your first inbox to join the swarm!</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                </div>
+                        <!-- Global Operations Log Ledger -->
+                        <section class="fleet-section" style="background: var(--bg-surface-glass); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px;">
+                            <div class="fleet-header" style="margin-bottom: 20px;">
+                                <div class="title-block">
+                                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #FFF; margin-bottom: 4px;">Global Swarm Operations</h2>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary);">Real-time cross-tenant background worker events stream</p>
+                                </div>
+                            </div>
 
-                <!-- ==================== ADMIN INFRASTRUCTURE PANEL ==================== -->
-                <div id="admin-dashboard-panel" class="hidden">
-                    <!-- Infrastructure Metrics Grid -->
-                    <section class="metrics-grid">
-                        <div class="metric-card glow-blue">
-                            <div class="metric-icon bg-blue" style="background-color: rgba(99, 102, 241, 0.1); color: var(--color-primary);">
-                                <i class="fa-solid fa-database"></i>
+                            <div class="table-container">
+                                <table class="fleet-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>Tenant ID</th>
+                                            <th>Module</th>
+                                            <th>Action Description</th>
+                                            <th>Telemetry Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-log-stream-body">
+                                        <tr>
+                                            <td colspan="5" class="table-empty">
+                                                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                                                <p>Awaiting Server-Sent Events stream from the warmup loop simulator...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="metric-info">
-                                <h3>Redis Queue Backlog</h3>
-                                <div class="metric-value" id="admin-redis-backlog">0</div>
-                                <p class="metric-subtext">Tasks pending in Celery broker</p>
-                            </div>
-                        </div>
-                        
-                        <div class="metric-card glow-green">
-                            <div class="metric-icon bg-green" style="background-color: rgba(16, 185, 129, 0.1); color: var(--color-green);">
-                                <i class="fa-solid fa-bolt"></i>
-                            </div>
-                            <div class="metric-info">
-                                <h3>Gemma 4B Inference</h3>
-                                <div class="metric-value" id="admin-gemma-speed">42.4</div>
-                                <p class="metric-subtext">Tokens/sec processing speeds</p>
-                            </div>
-                        </div>
-                        
-                        <div class="metric-card glow-indigo">
-                            <div class="metric-icon bg-indigo" style="background-color: rgba(245, 158, 11, 0.1); color: var(--color-warning);">
-                                <i class="fa-solid fa-temperature-three-quarters"></i>
-                            </div>
-                            <div class="metric-info">
-                                <h3>Local Hardware Temp</h3>
-                                <div class="metric-value" id="admin-temp">68°C</div>
-                                <p class="metric-subtext">Inference engine GPU status</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Global Operations Log Ledger -->
-                    <section class="fleet-section">
-                        <div class="fleet-header">
-                            <div class="title-block">
-                                <h2>Global Swarm Operations</h2>
-                                <p>Real-time cross-tenant background worker events stream</p>
-                            </div>
-                        </div>
-
-                        <div class="table-container">
-                            <table class="fleet-table">
-                                <thead>
-                                    <tr>
-                                        <th>Timestamp</th>
-                                        <th>Tenant ID</th>
-                                        <th>Module</th>
-                                        <th>Action Description</th>
-                                        <th>Telemetry Result</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-log-stream-body">
-                                    <!-- SSE streams dynamic entries here -->
-                                    <tr>
-                                        <td colspan="5" class="table-empty">
-                                            <i class="fa-solid fa-circle-notch fa-spin"></i>
-                                            <p>Awaiting Server-Sent Events stream from the warmup loop simulator...</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                </div>
-            </main>
+                        </section>
+                    </div>
+                </main>
+            </div>
         </div>
 
         <!-- ==================== ONBOARDING WIZARD MODAL ==================== -->
