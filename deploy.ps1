@@ -11,20 +11,11 @@ Write-Host "          SWARMWARM CLOUD VPS DEPLOYER" -ForegroundColor Cyan
 Write-Host "====================================================" -ForegroundColor Cyan
 
 # 1. Sync updated files to VPS
-Write-Host "[1/3] Uploading updated application assets to VPS..." -ForegroundColor Yellow
+Write-Host "[1/2] Uploading updated application assets to VPS..." -ForegroundColor Yellow
 scp -r app scripts requirements.txt .env $dest
 
-# 2. Terminate legacy instances
-Write-Host "[2/3] Cleaning up active execution processes on VPS..." -ForegroundColor Yellow
-ssh root@$vpsIp "pkill -9 -f 'uvicorn|celery|python'"
+# 2. Remote execution sequence (cleanup, launch, and log tailing in one SSH session to minimize password prompts)
+Write-Host "[2/2] Launching services and streaming logs on VPS..." -ForegroundColor Yellow
+$remoteCmd = "pkill -9 -f 'uvicorn|celery|python'; cd /root/SwarmWarm && source venv/bin/activate && nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 & sleep 2; cd /root/SwarmWarm && source venv/bin/activate && PYTHONPATH=. nohup celery -A app.core.celery_app worker --loglevel=info > celery.log 2>&1 & sleep 1; tail -f /root/SwarmWarm/uvicorn.log /root/SwarmWarm/celery.log"
 
-# 3. Launch updated server and worker nodes
-Write-Host "[3/3] Launching FastAPI gateway and Celery cluster..." -ForegroundColor Yellow
-ssh root@$vpsIp "cd /root/SwarmWarm && source venv/bin/activate && nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &"
-ssh root@$vpsIp "cd /root/SwarmWarm && source venv/bin/activate && PYTHONPATH=. nohup celery -A app.core.celery_app worker --loglevel=info > celery.log 2>&1 &"
-
-Write-Host "`n[SUCCESS] Deployment complete! Dashboard running at http://srv1764813.hstgr.cloud/" -ForegroundColor Green
-
-# 4. Stream live logs
-Write-Host "`n[LOGS] Streaming live VPS application logs (Press Ctrl+C to disconnect tail)..." -ForegroundColor Cyan
-ssh root@$vpsIp -t "tail -f /root/SwarmWarm/uvicorn.log /root/SwarmWarm/celery.log"
+ssh -t root@$vpsIp $remoteCmd
