@@ -377,8 +377,10 @@ input:focus {
 }
 
 .metric-card {
-    background: var(--bg-surface-glass);
-    border: 1px solid var(--border-color);
+    background: linear-gradient(145deg, rgba(25, 32, 48, 0.7) 0%, rgba(15, 20, 30, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     padding: 20px;
     display: flex;
@@ -391,7 +393,9 @@ input:focus {
 
 .metric-card:hover {
     transform: translateY(-2px);
-    border-color: var(--border-color-glow);
+    border-color: rgba(99, 102, 241, 0.3);
+    background: linear-gradient(145deg, rgba(30, 38, 58, 0.75) 0%, rgba(18, 24, 36, 0.85) 100%);
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.08);
 }
 
 .metric-icon {
