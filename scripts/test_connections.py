@@ -1,8 +1,14 @@
+import os
 import sys
 import smtplib
 import imaplib
 import getpass
-from swarmwarm.core.security import encrypt_credentials, decrypt_credentials
+
+# Allow running as a standalone script (python scripts/test_connections.py) by
+# putting the project root on sys.path before importing the app package.
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from app.core.security import encrypt_token, decrypt_token
 
 def test_smtp_connection(email, password, host, port, use_ssl=True):
     print(f"\n--- Testing SMTP Outbound Handshake ({host}:{port}) ---")
@@ -91,9 +97,9 @@ def main():
         
     print("\n--- Cryptographic Integration Demonstration ---")
     try:
-        encrypted_pass = encrypt_credentials(password)
+        encrypted_pass = encrypt_token(password)
         print(f"1. Encrypted password byte-string (to DB): {encrypted_pass[:30]}...[TRUNCATED]")
-        decrypted_pass = decrypt_credentials(encrypted_pass)
+        decrypted_pass = decrypt_token(encrypted_pass)
         print("2. Decrypted password byte-string (in memory): [CONFIRMED MATCH]")
     except Exception as e:
         print(f"Encryption integration failed: {e}")

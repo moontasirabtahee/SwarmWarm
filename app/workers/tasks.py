@@ -8,7 +8,11 @@ from app.core.db import (
     get_mailbox_by_id,
     update_mailbox_active_state,
     create_interaction_log,
-    create_system_log
+    create_system_log,
+    increment_emails_sent,
+    advance_schedule_day,
+    list_all_mailboxes,
+    get_schedule_by_mailbox,
 )
 
 logger = logging.getLogger("swarmwarm.tasks")
@@ -35,6 +39,34 @@ def set_mailbox_inactive_in_db(mailbox_id: str, reason: str):
         level="ERROR"
     )
 
+@app.task
+def run_nightly_swarm_cycle():
+    """
+    Periodic Celery Beat entrypoint (fires nightly at 00:00 UTC).
+
+    Recomputes the P2P bipartite allocation graph across all active mailboxes and
+    dispatches the resulting SMTP send / IMAP rescue tasks smoothly across the day.
+    Imported lazily to avoid a circular import (scheduler -> tasks -> celery_app).
+    """
+    from app.services.scheduler import generate_daily_swarm_graph, dispatch_daily_tasks
+
+    logger.info("[BEAT] Nightly swarm allocation cycle triggered.")
+
+    # Roll every active mailbox onto the next ramp day. This bumps target_send_count
+    # along the warmup curve AND resets emails_sent_today to 0 for the new day — without
+    # this, the daily counter would grow forever and the ramp would never progress.
+    advanced = 0
+    for mb in list_all_mailboxes():
+        if mb.get("is_active"):
+            advance_schedule_day(mb["id"])
+            advanced += 1
+
+    matches = generate_daily_swarm_graph()
+    dispatch_daily_tasks(matches)
+    logger.info(f"[BEAT] Nightly cycle: advanced {advanced} schedules, enqueued {len(matches)} warmup pairs.")
+    return {"status": "scheduled", "advanced": advanced, "pairs": len(matches)}
+
+
 @app.task(bind=True, max_retries=3, default_retry_delay=300)
 def execute_smtp_send_task(self, sender_mailbox_id: str, recipient_email: str):
     """
@@ -51,7 +83,19 @@ def execute_smtp_send_task(self, sender_mailbox_id: str, recipient_email: str):
         if not record["is_active"]:
             logger.warning(f"Aborting SMTP task: Mailbox {sender_mailbox_id} is inactive.")
             return {"status": "skipped", "reason": "mailbox_inactive"}
-            
+
+        # Enforce the daily send ceiling (ramp target / plan cap). The nightly scheduler
+        # resets emails_sent_today; once today's target is reached we stop sending.
+        schedule = get_schedule_by_mailbox(sender_mailbox_id)
+        if schedule and schedule["emails_sent_today"] >= schedule["target_send_count"]:
+            logger.info(f"Daily send target reached for {sender_mailbox_id}; skipping.")
+            create_system_log(
+                module="SMTP_WORKER",
+                event=(f"Daily target reached for {record['email']} "
+                       f"({schedule['emails_sent_today']}/{schedule['target_send_count']}); send skipped."),
+            )
+            return {"status": "skipped", "reason": "daily_limit_reached"}
+
         config = SMTPConfig(
             smtp_host=record["smtp_host"],
             smtp_port=record["smtp_port"],
@@ -87,8 +131,8 @@ def execute_smtp_send_task(self, sender_mailbox_id: str, recipient_email: str):
              
         # 2. Dispatch SMTP warmup using verified outbound module
         result = send_warmup_email(config, recipient_email, "Warmup Sync Request", body_text)
-        
-        # Write interaction log
+
+        # Write interaction log and advance the daily ramp counter for this mailbox
         create_interaction_log(
             user_id=record["user_id"],
             mailbox_id=sender_mailbox_id,
@@ -98,6 +142,7 @@ def execute_smtp_send_task(self, sender_mailbox_id: str, recipient_email: str):
             folder="INBOX",
             ai_replied=ai_used
         )
+        increment_emails_sent(sender_mailbox_id, 1)
         
         create_system_log(
             module="SMTP_WORKER",

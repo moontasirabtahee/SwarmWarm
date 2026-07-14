@@ -48,6 +48,7 @@ const onboardSmtpPort = document.getElementById("onboard-smtp-port");
 const onboardImapHost = document.getElementById("onboard-imap-host");
 const onboardImapPort = document.getElementById("onboard-imap-port");
 const onboardPassword = document.getElementById("onboard-password");
+const onboardLimit = document.getElementById("onboard-limit");
 const onboardSubmitBtn = document.getElementById("onboard-submit-btn");
 const onboardSpinner = document.getElementById("onboard-spinner");
 
@@ -276,7 +277,8 @@ function setupEventListeners() {
             imap_port: parseInt(onboardImapPort.value),
             app_password: onboardPassword.value,
             provider: activeProvider,
-            use_ssl: (parseInt(onboardSmtpPort.value) === 465)
+            use_ssl: (parseInt(onboardSmtpPort.value) === 465),
+            daily_send_limit: parseInt(onboardLimit.value) || 40
         };
         
         onboardSpinner.classList.remove("hidden");
@@ -324,6 +326,8 @@ function setupEventListeners() {
         toggleUserBtn.style.borderColor = "transparent";
         adminDashboardPanel.classList.remove("hidden");
         userDashboardPanel.classList.add("hidden");
+        fetchAdminStats();
+        fetchAdminTenants();
         fetchAdminLogs();
     });
 }
@@ -493,9 +497,105 @@ async function fetchDashboardData() {
         if (mailboxesRes.ok) {
             const mailboxes = await mailboxesRes.json();
             renderMailboxesTable(mailboxes);
+            const activeCount = mailboxes.filter(m => m.is_active).length;
+            const nodesEl = document.getElementById("stat-nodes");
+            if (nodesEl) nodesEl.textContent = activeCount;
         }
+
+        fetchSubscription();
     } catch (err) {
         console.error("Dashboard synchronization error:", err);
+    }
+}
+
+// Populate the sidebar subscription / quota card
+async function fetchSubscription() {
+    try {
+        const res = await fetch("/api/v1/billing/subscription", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const s = await res.json();
+        const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setText("plan-name", s.plan_name);
+        setText("plan-mailbox-count", `${s.mailboxes_used} / ${s.max_mailboxes}`);
+        setText("plan-cap", `Daily send cap: ${s.daily_send_cap}/day`);
+
+        const fill = document.getElementById("plan-usage-fill");
+        if (fill) {
+            const pct = s.max_mailboxes ? Math.min(100, Math.round((s.mailboxes_used / s.max_mailboxes) * 100)) : 0;
+            fill.style.width = `${pct}%`;
+            // Warn as the mailbox quota fills up.
+            fill.style.background = pct >= 100 ? "var(--color-red)"
+                : (pct >= 80 ? "var(--color-warning)" : "var(--color-primary)");
+        }
+    } catch (err) {
+        console.error("Failed to load subscription:", err);
+    }
+}
+
+// Fetch real cross-tenant KPIs for the admin panel
+async function fetchAdminStats() {
+    try {
+        const res = await fetch("/api/v1/admin/dashboard/stats", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const s = await res.json();
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        set("admin-total-sent", s.total_sent_24h);
+        set("admin-total-rescues", s.spam_rescues_24h);
+        set("admin-active-nodes", s.active_node_count);
+    } catch (err) {
+        console.error("Failed to load admin stats:", err);
+    }
+}
+
+// Fetch cross-tenant directory: users + per-tenant mailbox footprint
+async function fetchAdminTenants() {
+    try {
+        const [usersRes, boxesRes] = await Promise.all([
+            fetch("/api/v1/admin/users", { headers: { "Authorization": `Bearer ${token}` } }),
+            fetch("/api/v1/admin/mailboxes", { headers: { "Authorization": `Bearer ${token}` } })
+        ]);
+        if (!usersRes.ok) return;
+        const users = await usersRes.json();
+        const boxes = boxesRes.ok ? await boxesRes.json() : [];
+
+        const tenantsEl = document.getElementById("admin-total-tenants");
+        if (tenantsEl) tenantsEl.textContent = users.length;
+
+        // Tally each tenant's mailbox footprint.
+        const counts = {};
+        boxes.forEach(b => {
+            const c = counts[b.user_id] || { total: 0, active: 0 };
+            c.total += 1;
+            if (b.is_active) c.active += 1;
+            counts[b.user_id] = c;
+        });
+
+        const body = document.getElementById("admin-tenants-body");
+        if (!body) return;
+        if (users.length === 0) {
+            body.innerHTML = `<tr><td colspan="4" class="table-empty">No tenants registered yet.</td></tr>`;
+            return;
+        }
+        body.innerHTML = "";
+        users.forEach(u => {
+            const c = counts[u.id] || { total: 0, active: 0 };
+            const roleTag = u.role === "admin" ? "status-rescued" : "status-sent";
+            const tr = document.createElement("tr");
+            tr.style.cursor = "default";
+            tr.innerHTML = `
+                <td><strong>${u.email}</strong></td>
+                <td><span class="status-tag ${roleTag}">${u.role}</span></td>
+                <td>${c.total}</td>
+                <td><span class="status-tag status-success">${c.active} active</span></td>
+            `;
+            body.appendChild(tr);
+        });
+    } catch (err) {
+        console.error("Failed to load tenant directory:", err);
     }
 }
 
@@ -597,19 +697,54 @@ function renderMailboxesTable(mailboxes) {
     });
 }
 
+// Fetch and render REAL ramp curve + placement split for a single mailbox
+async function fetchNodeStats(mailboxId) {
+    const rampVal = document.getElementById("node-ramp-val");
+    const rampFill = document.getElementById("node-ramp-fill");
+    const rampMeta = document.getElementById("node-ramp-meta");
+    const inboxRate = document.getElementById("node-inbox-rate");
+    const spamRate = document.getElementById("node-spam-rate");
+    const inboxFill = document.getElementById("node-inbox-fill");
+    const spamFill = document.getElementById("node-spam-fill");
+
+    // Neutral loading state
+    rampVal.textContent = "… / …";
+    try {
+        const res = await fetch(`/api/v1/mailboxes/${mailboxId}/stats`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("stats unavailable");
+        const s = await res.json();
+
+        const ramp = s.ramp || {};
+        rampVal.textContent = `${ramp.emails_sent_today ?? 0} / ${ramp.target_send_count ?? 0} sends today`;
+        rampFill.style.width = `${Math.min(100, ramp.progress_pct ?? 0)}%`;
+        rampMeta.textContent = `Day ${ramp.current_day ?? 1} of ramp · ceiling ${ramp.daily_send_limit ?? 40}/day`;
+
+        const p = s.placement || {};
+        const inbox = p.inbox_rate ?? 100;
+        const spam = p.spam_rate ?? 0;
+        inboxRate.textContent = `${inbox}%`;
+        spamRate.textContent = `${spam}%`;
+        inboxFill.style.width = `${inbox}%`;
+        spamFill.style.width = `${spam}%`;
+    } catch (err) {
+        rampVal.textContent = "No schedule data";
+        rampFill.style.width = "0%";
+        console.warn("Node stats fetch failed:", err);
+    }
+}
+
 // Open deep analytics panel
 async function openAnalyticsModal(mailbox) {
     analyticsModal.classList.add("active");
     
     document.getElementById("node-details-email").textContent = mailbox.email;
     document.getElementById("node-details-id").textContent = `Node ID: ${mailbox.id}`;
-    
-    const rampVal = mailbox.is_active ? 18 : 0;
-    const progressPercent = mailbox.is_active ? 45.0 : 0;
-    
-    document.getElementById("node-ramp-val").textContent = `${rampVal} / 40 daily sends`;
-    document.getElementById("node-ramp-fill").style.width = `${progressPercent}%`;
-    
+
+    // Pull REAL ramp + placement telemetry from the backend schedule/ledger.
+    fetchNodeStats(mailbox.id);
+
     const logsBody = document.getElementById("node-logs-body");
     logsBody.innerHTML = `
         <tr>

@@ -13,6 +13,7 @@ class MailboxOnboardRequest(BaseModel):
     app_password: str = Field(..., description="Plaintext app password token")
     provider: str = Field("custom", description="Email provider type (google, microsoft, custom)")
     use_ssl: bool = Field(True, description="Establish secure direct SSL socket connection if True")
+    daily_send_limit: int = Field(40, ge=1, le=500, description="Maximum daily outbound ceiling for this mailbox")
 
 class MailboxResponse(BaseModel):
     """
@@ -28,3 +29,4 @@ class MailboxResponse(BaseModel):
     provider: str
     use_ssl: bool
     is_active: bool
+    daily_send_limit: int = 40

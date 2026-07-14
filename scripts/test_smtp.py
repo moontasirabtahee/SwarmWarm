@@ -1,6 +1,10 @@
 import os
 import sys
 from dotenv import load_dotenv
+
+# Allow running standalone (python scripts/test_smtp.py) without setting PYTHONPATH.
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from app.core.security import encrypt_token
 from app.workers.smtp_engine import send_warmup_email, SMTPConfig
 

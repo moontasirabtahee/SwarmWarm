@@ -40,81 +40,72 @@ SwarmWarm/
 
 ---
 
+## 🧱 Architecture
+
+* **API / control plane:** FastAPI (`app/main.py`) — auth, mailbox fleet CRUD, billing, teams, analytics, SSE.
+* **Database:** SQLAlchemy Core over `DATABASE_URL`. SQLite for local dev (auto-created + seeded); **PostgreSQL** for production, schema managed by **Alembic**.
+* **Background workers:** Celery worker + Celery beat (nightly P2P allocation) over Redis.
+* **Auth:** bcrypt password hashing, JWT access tokens + rotating refresh tokens, email verification, password reset, login rate limiting.
+* **Billing:** plans / subscriptions with quota enforcement (mailbox ceiling + daily send cap); Stripe checkout + webhook (dev-mode fallback for local testing).
+* **Teams:** organizations with members, roles, and email invitations.
+
+---
+
 ## 🛠️ Local Installation
 
-### 1. Configure Python Virtual Environment
+### 1. Environment
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-pip install -r requirements.txt
+source venv/bin/activate            # Windows: .\venv\Scripts\activate
+pip install -r requirements-dev.txt  # includes pytest; use requirements.txt for runtime only
+cp .env.template .env                # then fill in SWARMWARM_SECRET_KEY + SWARMWARM_JWT_SECRET
+```
+Generate the two required secrets:
+```bash
+python -c "import os,base64;print('SWARMWARM_SECRET_KEY='+base64.b64encode(os.urandom(32)).decode())"
+python -c "import secrets;print('SWARMWARM_JWT_SECRET='+secrets.token_urlsafe(48))"
+```
+Leaving `DATABASE_URL` unset uses a local SQLite file (auto-created and seeded with demo data on first boot).
+
+### 2. Run
+```bash
+uvicorn app.main:app --reload                              # API + SPA on :8000
+celery -A app.core.celery_app worker --loglevel=info       # background worker
+celery -A app.core.celery_app beat --loglevel=info         # nightly scheduler
 ```
 
-### 2. Set Up Local Configuration File
-Copy the template and adjust your local environmental coordinates:
+### 3. Test
 ```bash
-cp .env.template .env
-```
-Inside `.env`, configure:
-* `SWARMWARM_SECRET_KEY`: A 32-byte base64-encoded master encryption key.
-* `REDIS_BROKER_URL`: Connection string to your local Redis instance (`redis://localhost:6379/0`).
-
-### 3. Run Diagnostic Verification Scripts
-```bash
-# Verify GCM Cryptography:
-$env:PYTHONPATH="."; python scripts/test_crypto.py
-
-# Verify LLM Tunnel Connectivity:
-$env:PYTHONPATH="."; python scripts/test_ai_warmup_loop.py
+pytest                                # full API + unit suite (isolated temp DB)
+python scripts/test_crypto.py         # crypto diagnostic
 ```
 
 ---
 
-## 🌐 Production VPS Deployment
+## 🐳 Docker Compose (recommended for production)
 
-### 1. Push Codebase Files to VPS
-From your local terminal, copy the application structure to your cloud VPS:
+Brings up Postgres + Redis + web + worker + beat, runs Alembic migrations automatically:
 ```bash
-ssh root@<VPS_IP> "mkdir -p /root/SwarmWarm"
-scp -r app scripts requirements.txt .env.template root@<VPS_IP>:/root/SwarmWarm/
+cp .env.template .env     # set SWARMWARM_SECRET_KEY and SWARMWARM_JWT_SECRET
+docker compose up --build
 ```
+The `web` container runs `alembic upgrade head` before serving. Health probes:
+* Liveness: `GET /health`
+* Readiness (checks DB): `GET /ready`
 
-### 2. Configure VPS Prerequisites
-SSH into your VPS and install dependencies:
+### Manual PostgreSQL deployment
 ```bash
-apt update && apt upgrade -y
-apt install python3 python3-pip python3-venv redis-server ufw -y
-
-# Enable & start Redis broker
-systemctl start redis-server && systemctl enable redis-server
-
-# Allow gateway port 8000 and SSH through firewall
-ufw allow OpenSSH
-ufw allow 8000/tcp
-ufw --force enable
-```
-
-### 3. Build VPS Runtime Environment
-```bash
-cd /root/SwarmWarm
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.template .env  # Edit and insert variables using nano
-```
-
-### 4. Launch Services in the Background
-```bash
-# Start FastAPI Server
-nohup venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &
-
-# Start Celery Worker Node
-PYTHONPATH=. nohup venv/bin/celery -A app.core.celery_app worker --loglevel=info > celery.log 2>&1 &
+export DATABASE_URL=postgresql+psycopg://user:pass@host:5432/swarmwarm
+alembic upgrade head                                       # create/upgrade schema
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+celery -A app.core.celery_app worker --loglevel=info
+celery -A app.core.celery_app beat --loglevel=info
 ```
 
 ---
 
 ## 📊 Live Verification Console
-* **Control Panel Portal:** `http://<VPS_IP>:8000/`
-* **Swagger API Endpoint Docs:** `http://<VPS_IP>:8000/docs`
+* **Control Panel Portal:** `http://<HOST>:8000/`
+* **Swagger API Endpoint Docs:** `http://<HOST>:8000/docs`
 
 *Log in with your seeded administrator credentials to toggle between the Standard User view (placement rates, mailbox CRUD switches) and the Admin Radar telemetry dashboard (Redis queue backlog, token generation speeds, CPU temperature metrics).*

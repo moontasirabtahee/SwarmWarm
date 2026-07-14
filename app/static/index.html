@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwarmWarm - P2P Email Warmup Control Panel</title>
-    <!-- Google Fonts Inter & Outfit -->
+    <title>SwarmWarm — P2P Email Warmup Control Plane</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/index.css">
 </head>
 <body>
     <div id="app">
-        <!-- ==================== PUBLIC LANDING PAGE VIEW ==================== -->
+        <!-- ==================== PUBLIC LANDING PAGE ==================== -->
         <div id="landing-view" class="view active">
             <div class="landing-view-container">
-                <!-- Navigation -->
                 <nav class="landing-nav">
                     <div class="header-brand">
                         <i class="fa-solid fa-fire-flame-curved brand-icon"></i>
@@ -26,87 +23,115 @@
                     <button id="landing-login-btn" class="btn btn-outline btn-sm">Sign In</button>
                 </nav>
 
-                <!-- Hero Section -->
                 <header class="landing-hero">
                     <div class="hero-glow"></div>
-                    <h1>Consensus Peer-to-Peer<br>Email Warmup Swarm</h1>
-                    <p>Automate SMTP & IMAP inbox warmup exchanges across isolated sender fleets. Utilizes localized Gemma LLM models to simulate natural B2B interactions and recover sender domain reputation organically.</p>
-                    <button id="landing-cta-btn" class="btn btn-primary" style="font-size: 1.1rem; padding: 14px 28px;">
-                        <span>Access Warmup Dashboard</span>
-                        <i class="fa-solid fa-rocket"></i>
-                    </button>
+                    <div class="hero-badge">
+                        <span class="dot"></span>
+                        Peer-to-peer deliverability mesh · live
+                    </div>
+                    <h1>Rebuild sender reputation<br>with a <span class="grad">collaborative warmup swarm</span></h1>
+                    <p>SwarmWarm links isolated mailboxes into a shared peer-to-peer network, runs authentic SMTP &amp; IMAP exchanges, rescues messages from spam, and replies with a local Gemma LLM — so new domains earn inbox trust organically.</p>
+                    <div class="hero-cta-row">
+                        <button id="landing-cta-btn" class="btn btn-primary" style="font-size: 1.02rem; padding: 14px 26px;">
+                            <span>Access Warmup Dashboard</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <a href="#how" class="btn btn-outline" style="padding: 14px 26px;">See how it works</a>
+                    </div>
+                    <div class="hero-trust">
+                        <span><i class="fa-solid fa-lock"></i> AES-256-GCM credential vault</span>
+                        <span><i class="fa-solid fa-shield-halved"></i> Strict cross-tenant isolation</span>
+                        <span><i class="fa-solid fa-bolt"></i> Zero-cost local inference</span>
+                    </div>
                 </header>
 
-                <!-- Features Grid -->
+                <section class="section-heading">
+                    <h2>Deliverability engineering, automated</h2>
+                    <p>Everything a modern outbound team needs to warm domains without babysitting inboxes.</p>
+                </section>
                 <section class="features-grid-landing">
                     <div class="feature-card-landing">
                         <div class="icon-box"><i class="fa-solid fa-network-wired"></i></div>
                         <h3>P2P Warmup Network</h3>
-                        <p>Automatically match mailboxes inside the swarm using a bipartite directed graph scheduling algorithm to maximize cross-provider coverage.</p>
+                        <p>A nightly bipartite graph pairs mailboxes across different owners and providers, maximising cross-provider coverage while never looping within a single tenant.</p>
                     </div>
                     <div class="feature-card-landing">
                         <div class="icon-box"><i class="fa-solid fa-brain"></i></div>
                         <h3>Local Gemma 4B AI</h3>
-                        <p>Simulates contextual replies, automatic RFC threading headers (In-Reply-To), and natural language topics over reverse-proxy tunnels.</p>
+                        <p>Context-aware replies with RFC-compliant threading headers (In-Reply-To, References), generated on your own hardware over a private reverse-proxy tunnel.</p>
                     </div>
                     <div class="feature-card-landing">
                         <div class="icon-box"><i class="fa-solid fa-lock"></i></div>
-                        <h3>Symmetric GCM Encryption</h3>
-                        <p>Your SMTP and IMAP passwords are never saved in plaintext. AES-256-GCM symmetric byte encryption secures all credentials locally.</p>
+                        <h3>Encrypted Credential Vault</h3>
+                        <p>SMTP and IMAP app passwords are sealed with AES-256-GCM before they ever touch the database. The master key lives only in the server environment.</p>
                     </div>
                 </section>
 
-                <!-- How It Works Timeline -->
-                <section class="how-it-works" style="margin-top: 40px; margin-bottom: 80px; text-align: center;">
-                    <h2 style="font-size: 1.8rem; font-weight: 700; color: #FFF; margin-bottom: 12px;">How SwarmWarm Operates</h2>
-                    <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px auto; font-size: 0.95rem;">Decentralized email deliverability repair in three clear steps</p>
-                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px;">
-                        <div style="flex: 1; min-width: 250px; max-width: 320px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; text-align: left;">
-                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--color-primary); margin-bottom: 14px;">01</div>
-                            <h4 style="color: #FFF; margin-bottom: 8px; font-weight: 600;">Secure Node Onboarding</h4>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">Connect standard SMTP/IMAP credentials. The app immediately encodes it using client-side GCM encryption before transit.</p>
-                        </div>
-                        <div style="flex: 1; min-width: 250px; max-width: 320px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; text-align: left;">
-                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--color-green); margin-bottom: 14px;">02</div>
-                            <h4 style="color: #FFF; margin-bottom: 8px; font-weight: 600;">P2P Pairing Consensus</h4>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">Our matching algorithm builds daily non-looping transaction paths across different domains to simulate realistic correspondence.</p>
-                        </div>
-                        <div style="flex: 1; min-width: 250px; max-width: 320px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; text-align: left;">
-                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--color-warning); margin-bottom: 14px;">03</div>
-                            <h4 style="color: #FFF; margin-bottom: 8px; font-weight: 600;">Contextual AI Threading</h4>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">Celery queues execute sends and scan spam folders to move inbox messages back, replying contextually via local Gemma inference.</p>
-                        </div>
+                <section class="proof-band">
+                    <div class="proof-stat"><div class="num">3</div><div class="lbl">Providers supported</div></div>
+                    <div class="proof-stat"><div class="num">30d</div><div class="lbl">Automated ramp curve</div></div>
+                    <div class="proof-stat"><div class="num">95%+</div><div class="lbl">Target inbox placement</div></div>
+                    <div class="proof-stat"><div class="num">0$</div><div class="lbl">LLM inference cost</div></div>
+                </section>
+
+                <section id="how" class="section-heading">
+                    <h2>How SwarmWarm operates</h2>
+                    <p>Decentralised email deliverability repair in three clear steps.</p>
+                </section>
+                <section class="steps-grid" style="margin-bottom: 80px;">
+                    <div class="step-card">
+                        <div class="step-num" style="color: var(--color-primary-2);">01</div>
+                        <h4>Secure node onboarding</h4>
+                        <p>Connect standard SMTP/IMAP credentials. The app encrypts them with AES-256-GCM before writing anything to storage.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num" style="color: var(--color-green);">02</div>
+                        <h4>P2P pairing consensus</h4>
+                        <p>The scheduler builds daily non-looping transaction paths across different domains to simulate realistic correspondence.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num" style="color: var(--color-fire);">03</div>
+                        <h4>Contextual AI threading</h4>
+                        <p>Workers dispatch sends, rescue messages from spam, and reply contextually via local Gemma inference.</p>
                     </div>
                 </section>
+
+                <footer class="landing-footer">
+                    <div class="header-brand" style="font-size: 1.1rem;">
+                        <i class="fa-solid fa-fire-flame-curved brand-icon"></i>
+                        <span>SwarmWarm</span>
+                    </div>
+                    <span>© 2026 SwarmWarm · Multi-Tenant P2P Email Warmup Engine</span>
+                </footer>
             </div>
         </div>
 
-        <!-- ==================== SESSION GATEWAY VIEW ==================== -->
+        <!-- ==================== SESSION GATEWAY ==================== -->
         <div id="auth-view" class="view">
             <div class="auth-container">
                 <div class="auth-card">
                     <div class="back-to-landing-link" id="back-to-landing">
                         <i class="fa-solid fa-arrow-left"></i>
-                        <span>Back to Home</span>
+                        <span>Back to home</span>
                     </div>
                     <div class="auth-header">
                         <div class="logo">
                             <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
                             <span>SwarmWarm</span>
                         </div>
-                        <h2 id="auth-title">Welcome Back</h2>
+                        <h2 id="auth-title">Welcome back</h2>
                         <p id="auth-subtitle">Log in to manage your P2P email warmup fleet</p>
                     </div>
-                    
+
                     <form id="auth-form">
                         <div class="form-group">
-                            <label for="auth-email">Account Email</label>
+                            <label for="auth-email">Account email</label>
                             <div class="input-wrapper">
                                 <i class="fa-regular fa-envelope input-icon"></i>
                                 <input type="email" id="auth-email" placeholder="name@company.com" required>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="auth-password">Password</label>
                             <div class="input-wrapper">
@@ -114,122 +139,152 @@
                                 <input type="password" id="auth-password" placeholder="••••••••" required>
                             </div>
                         </div>
-                        
+
                         <div id="auth-error" class="alert-box error hidden">
                             <i class="fa-solid fa-circle-exclamation alert-icon"></i>
                             <span class="alert-msg">Invalid credentials. Please try again.</span>
                         </div>
-                        
+
                         <button type="submit" id="auth-submit-btn" class="btn btn-primary btn-block">
                             <span>Sign In</span>
                             <i class="fa-solid fa-arrow-right-to-bracket"></i>
                         </button>
                     </form>
-                    
+
                     <div class="auth-footer">
                         <span id="auth-toggle-msg">New to SwarmWarm?</span>
                         <a href="#" id="auth-toggle-link">Create an account</a>
+                    </div>
+
+                    <div class="seed-hint">
+                        Demo login · <code>ieee.dobby1998@gmail.com</code> / <code>SwarmWarm2026!</code>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== CONTROL CENTER WORKSPACE VIEW ==================== -->
-        <div id="dashboard-view" class="view" style="display: flex; min-height: 100vh;">
-            <!-- Left Sidebar Navigation & Stats -->
-            <aside class="dashboard-sidebar" style="width: 320px; min-width: 320px; background: #131824; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 16px 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; z-index: 90;">
-                <div class="logo" style="justify-content: flex-start; margin-bottom: 16px;">
-                    <i class="fa-solid fa-fire-flame-curved logo-icon" style="color: var(--color-primary); filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.4));"></i>
-                    <span style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; color: #FFF; margin-left: 8px;">SwarmWarm</span>
-                </div>
-                
-                <div class="console-toggle" id="console-toggle-container" style="display: flex; gap: 8px; margin-bottom: 20px;">
-                    <button id="toggle-user-btn" class="btn btn-sm btn-outline active" style="flex: 1; border-color: var(--color-primary);">User View</button>
-                    <button id="toggle-admin-btn" class="btn btn-sm btn-outline" style="flex: 1;">Admin Radar</button>
+        <!-- ==================== CONTROL CENTER WORKSPACE ==================== -->
+        <div id="dashboard-view" class="view">
+            <!-- Sidebar -->
+            <aside class="dashboard-sidebar">
+                <div class="sidebar-brand">
+                    <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
+                    <span>SwarmWarm</span>
                 </div>
 
-                <!-- Stats Widgets Inside Sidebar (Consolidates Gaps) -->
-                <div class="sidebar-widgets" style="display: flex; flex-direction: column; gap: 20px; flex-grow: 1;">
-                     <!-- Placement Health -->
-                     <div class="health-overview-card" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(255,255,255,0.01); margin-bottom: 0;">
-                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                             <h4 style="font-size: 0.85rem; color: var(--text-secondary);">Placement Health</h4>
-                             <span id="stat-health" style="font-weight: 700; color: var(--color-green);">100%</span>
-                         </div>
-                         <div class="health-bar-container" style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
-                             <div class="health-bar-fill" id="stat-health-fill" style="width: 100%; height: 100%; background: var(--color-green);"></div>
-                         </div>
-                         <span style="font-size: 0.75rem; color: var(--text-muted);">Targeting 95%+ placement rate</span>
-                     </div>
-
-                     <!-- Mini Stats cards -->
-                     <div style="display: flex; flex-direction: column; gap: 12px;">
-                         <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
-                             <i class="fa-solid fa-paper-plane" style="color: var(--color-blue); font-size: 1.1rem;"></i>
-                             <div>
-                                 <div style="font-size: 0.75rem; color: var(--text-muted);">Sends (24h)</div>
-                                 <div id="stat-sent" style="font-size: 1.2rem; font-weight: 700; color: #FFF;">0</div>
-                             </div>
-                         </div>
-                         <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
-                             <i class="fa-solid fa-shield-halved" style="color: var(--color-green); font-size: 1.1rem;"></i>
-                             <div>
-                                 <div style="font-size: 0.75rem; color: var(--text-muted);">Spam Rescues</div>
-                                 <div id="stat-rescued" style="font-size: 1.2rem; font-weight: 700; color: #FFF;">0</div>
-                             </div>
-                         </div>
-                         <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px;">
-                             <i class="fa-solid fa-microchip" style="color: var(--color-primary); font-size: 1.1rem;"></i>
-                             <div>
-                                 <div style="font-size: 0.75rem; color: var(--text-muted);">AI Replies</div>
-                                 <div id="stat-ai" style="font-size: 1.2rem; font-weight: 700; color: #FFF;">0</div>
-                             </div>
-                         </div>
-                     </div>
+                <div class="console-toggle" id="console-toggle-container">
+                    <button id="toggle-user-btn" class="btn btn-sm btn-outline active">User View</button>
+                    <button id="toggle-admin-btn" class="btn btn-sm btn-outline">Admin Radar</button>
                 </div>
 
-                <!-- Footer details -->
-                <div class="sidebar-footer" style="font-size: 0.75rem; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: auto;">
-                    <span>SwarmWarm Node Agent v1.0</span>
+                <div class="sidebar-section-label">Mesh signal</div>
+                <div class="health-overview-card">
+                    <div class="row">
+                        <h4>Placement health</h4>
+                        <span id="stat-health" style="font-weight: 700; color: var(--color-green);">100%</span>
+                    </div>
+                    <div class="health-bar-container">
+                        <div class="health-bar-fill" id="stat-health-fill" style="width: 100%;"></div>
+                    </div>
+                    <span class="health-caption">Targeting 95%+ inbox placement rate</span>
                 </div>
+
+                <div class="sidebar-section-label">Node agent</div>
+                <div class="mini-stat">
+                    <i class="fa-solid fa-circle-nodes" style="color: var(--color-primary-2);"></i>
+                    <div>
+                        <div class="label">Swarm status</div>
+                        <div class="value" style="font-size: 0.95rem; color: var(--color-green);">Operational</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section-label">Subscription</div>
+                <div class="health-overview-card" id="plan-card">
+                    <div class="row">
+                        <h4>Current plan</h4>
+                        <span id="plan-name" class="badge badge-indigo">—</span>
+                    </div>
+                    <div class="row" style="margin-bottom: 6px;">
+                        <span class="health-caption" style="margin: 0;">Mailboxes in use</span>
+                        <span id="plan-mailbox-count" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 700;">– / –</span>
+                    </div>
+                    <div class="health-bar-container">
+                        <div class="health-bar-fill" id="plan-usage-fill" style="width: 0%; background: var(--color-primary);"></div>
+                    </div>
+                    <span class="health-caption" id="plan-cap">Daily send cap: –</span>
+                </div>
+
+                <div class="sidebar-footer">SwarmWarm Node Agent v1.0</div>
             </aside>
 
-            <!-- Right Main Area -->
-            <div style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; height: 100vh;">
-                <!-- Main Header (User state and actions) -->
-                <header class="app-header" style="background: var(--bg-surface-glass); border-bottom: 1px solid var(--border-color); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 80;">
-                    <div style="font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: #FFF;">
-                        Workspace Fleet Command
+            <!-- Main -->
+            <div class="dashboard-main">
+                <header class="app-header">
+                    <div>
+                        <div class="title">Workspace Fleet Command</div>
+                        <div class="subtitle">Peer-to-peer reputation mesh</div>
                     </div>
                     <div class="header-actions">
                         <div class="user-profile">
-                            <div class="avatar"><i class="fa-solid fa-user-shield"></i></div>
+                            <div class="avatar"><i class="fa-solid fa-user-astronaut"></i></div>
                             <span id="user-email-display">user@swarmwarm.io</span>
                         </div>
                         <button id="logout-btn" class="btn btn-outline btn-sm">
-                            <i class="fa-solid fa-sign-out-alt"></i>
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
                             <span>Logout</span>
                         </button>
                     </div>
                 </header>
 
-                <!-- Workspace Panels -->
-                <main class="dashboard-content" style="padding: 20px 24px; flex-grow: 1;">
-                    <!-- ==================== USER MAIN WORKSPACE ==================== -->
+                <main class="dashboard-content">
+                    <!-- ===== USER PANEL ===== -->
                     <div id="user-dashboard-panel">
-                        <!-- Mailbox Fleet Command -->
-                        <section class="fleet-section" style="background: var(--bg-surface-glass); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
-                            <div class="fleet-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                                <div class="title-block">
-                                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #FFF; margin-bottom: 4px;">Mailbox Fleet</h2>
-                                    <p style="font-size: 0.85rem; color: var(--text-secondary);">Manage and monitor inbox warmups</p>
+                        <div class="kpi-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-top">
+                                    <h3>Warmup Sends</h3>
+                                    <div class="kpi-icon bg-blue"><i class="fa-solid fa-paper-plane"></i></div>
+                                </div>
+                                <div class="kpi-value" id="stat-sent">0</div>
+                                <div class="kpi-sub">Outbound transactions (rolling)</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-top">
+                                    <h3>Spam Rescues</h3>
+                                    <div class="kpi-icon bg-green"><i class="fa-solid fa-shield-halved"></i></div>
+                                </div>
+                                <div class="kpi-value" id="stat-rescued">0</div>
+                                <div class="kpi-sub">Messages recovered from spam</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-top">
+                                    <h3>AI Replies</h3>
+                                    <div class="kpi-icon bg-indigo"><i class="fa-solid fa-microchip"></i></div>
+                                </div>
+                                <div class="kpi-value" id="stat-ai">0</div>
+                                <div class="kpi-sub">Gemma-generated contextual replies</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-top">
+                                    <h3>Active Nodes</h3>
+                                    <div class="kpi-icon bg-amber"><i class="fa-solid fa-circle-nodes"></i></div>
+                                </div>
+                                <div class="kpi-value" id="stat-nodes">0</div>
+                                <div class="kpi-sub">Mailboxes live in the swarm</div>
+                            </div>
+                        </div>
+
+                        <section class="panel">
+                            <div class="panel-header">
+                                <div>
+                                    <h2>Mailbox Fleet</h2>
+                                    <p>Manage and monitor inbox warmups. Click a row for deep node analytics.</p>
                                 </div>
                                 <button id="add-mailbox-btn" class="btn btn-primary">
                                     <i class="fa-solid fa-plus"></i>
                                     <span>Onboard Mailbox</span>
                                 </button>
                             </div>
-
                             <div class="table-container">
                                 <table class="fleet-table">
                                     <thead>
@@ -243,7 +298,6 @@
                                         </tr>
                                     </thead>
                                     <tbody id="mailbox-list-body">
-                                        <!-- Dynamic rows go here -->
                                         <tr>
                                             <td colspan="6" class="table-empty">
                                                 <i class="fa-solid fa-inbox"></i>
@@ -256,36 +310,93 @@
                         </section>
                     </div>
 
-                    <!-- ==================== ADMIN MAIN WORKSPACE ==================== -->
+                    <!-- ===== ADMIN PANEL ===== -->
                     <div id="admin-dashboard-panel" class="hidden">
-                        <!-- Infrastructure Telemetry Grid -->
-                        <section class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 24px;">
-                            <div class="metric-card glow-blue">
-                                <div class="metric-icon bg-blue" style="background-color: rgba(99, 102, 241, 0.1); color: var(--color-primary);">
-                                    <i class="fa-solid fa-database"></i>
+                        <div class="kpi-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-top">
+                                    <h3>Global Sends</h3>
+                                    <div class="kpi-icon bg-blue"><i class="fa-solid fa-paper-plane"></i></div>
                                 </div>
+                                <div class="kpi-value" id="admin-total-sent">0</div>
+                                <div class="kpi-sub">Cross-tenant outbound volume</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-top">
+                                    <h3>Global Rescues</h3>
+                                    <div class="kpi-icon bg-green"><i class="fa-solid fa-shield-halved"></i></div>
+                                </div>
+                                <div class="kpi-value" id="admin-total-rescues">0</div>
+                                <div class="kpi-sub">Spam interceptions swarm-wide</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-top">
+                                    <h3>Active Swarm Nodes</h3>
+                                    <div class="kpi-icon bg-amber"><i class="fa-solid fa-circle-nodes"></i></div>
+                                </div>
+                                <div class="kpi-value" id="admin-active-nodes">0</div>
+                                <div class="kpi-sub">Live mailboxes across tenants</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-top">
+                                    <h3>Tenants</h3>
+                                    <div class="kpi-icon bg-indigo"><i class="fa-solid fa-users"></i></div>
+                                </div>
+                                <div class="kpi-value" id="admin-total-tenants">0</div>
+                                <div class="kpi-sub">Registered accounts</div>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section-label" style="margin: 0 0 12px 2px;">Tenant directory</div>
+                        <section class="panel">
+                            <div class="panel-header">
+                                <div>
+                                    <h2>Registered Tenants</h2>
+                                    <p>Accounts and their mailbox footprint across the swarm</p>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="fleet-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tenant</th>
+                                            <th>Role</th>
+                                            <th>Mailboxes</th>
+                                            <th>Active</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-tenants-body">
+                                        <tr>
+                                            <td colspan="4" class="table-empty">
+                                                <i class="fa-solid fa-users"></i>
+                                                <p>Loading tenant directory…</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <div class="sidebar-section-label" style="margin: 0 0 12px 2px;">Infrastructure telemetry</div>
+                        <section class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-icon bg-blue"><i class="fa-solid fa-database"></i></div>
                                 <div class="metric-info">
                                     <h3>Redis Queue Backlog</h3>
                                     <div class="metric-value" id="admin-redis-backlog">0</div>
                                     <p class="metric-subtext">Tasks pending in Celery broker</p>
                                 </div>
                             </div>
-                            
-                            <div class="metric-card glow-green">
-                                <div class="metric-icon bg-green" style="background-color: rgba(16, 185, 129, 0.1); color: var(--color-green);">
-                                    <i class="fa-solid fa-bolt"></i>
-                                </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-green"><i class="fa-solid fa-bolt"></i></div>
                                 <div class="metric-info">
                                     <h3>Gemma 4B Inference</h3>
                                     <div class="metric-value" id="admin-gemma-speed">42.4</div>
-                                    <p class="metric-subtext">Tokens/sec processing speeds</p>
+                                    <p class="metric-subtext">Tokens/sec processing speed</p>
                                 </div>
                             </div>
-                            
-                            <div class="metric-card glow-indigo">
-                                <div class="metric-icon bg-indigo" style="background-color: rgba(245, 158, 11, 0.1); color: var(--color-warning);">
-                                    <i class="fa-solid fa-temperature-three-quarters"></i>
-                                </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-amber"><i class="fa-solid fa-temperature-three-quarters"></i></div>
                                 <div class="metric-info">
                                     <h3>Local Hardware Temp</h3>
                                     <div class="metric-value" id="admin-temp">68°C</div>
@@ -294,15 +405,13 @@
                             </div>
                         </section>
 
-                        <!-- Global Operations Log Ledger -->
-                        <section class="fleet-section" style="background: var(--bg-surface-glass); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px;">
-                            <div class="fleet-header" style="margin-bottom: 20px;">
-                                <div class="title-block">
-                                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #FFF; margin-bottom: 4px;">Global Swarm Operations</h2>
-                                    <p style="font-size: 0.85rem; color: var(--text-secondary);">Real-time cross-tenant background worker events stream</p>
+                        <section class="panel">
+                            <div class="panel-header">
+                                <div>
+                                    <h2>Global Swarm Operations</h2>
+                                    <p>Real-time cross-tenant background worker event stream</p>
                                 </div>
                             </div>
-
                             <div class="table-container">
                                 <table class="fleet-table">
                                     <thead>
@@ -318,7 +427,7 @@
                                         <tr>
                                             <td colspan="5" class="table-empty">
                                                 <i class="fa-solid fa-circle-notch fa-spin"></i>
-                                                <p>Awaiting Server-Sent Events stream from the warmup loop simulator...</p>
+                                                <p>Awaiting Server-Sent Events stream from the warmup loop...</p>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -330,20 +439,20 @@
             </div>
         </div>
 
-        <!-- ==================== ONBOARDING WIZARD MODAL ==================== -->
+        <!-- ==================== ONBOARDING MODAL ==================== -->
         <div id="onboard-modal" class="modal-overlay">
             <div class="modal-card">
                 <div class="modal-header">
-                    <h2>Onboard Mailbox</h2>
-                    <button class="modal-close-btn" id="close-onboard-btn">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
+                    <div>
+                        <h2>Onboard Mailbox</h2>
+                        <p class="subtitle">Link a new interaction endpoint to the swarm</p>
+                    </div>
+                    <button class="modal-close-btn" id="close-onboard-btn"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                
+
                 <form id="onboard-form">
-                    <!-- Step 1: Select Infrastructure Provider -->
                     <div class="form-section">
-                        <label>Email Provider</label>
+                        <label>Email provider</label>
                         <div class="provider-selector-grid">
                             <div class="provider-card active" data-provider="google">
                                 <i class="fa-brands fa-google provider-logo text-google"></i>
@@ -360,53 +469,49 @@
                         </div>
                     </div>
 
-                    <!-- Contextual Password Warning Banner -->
                     <div id="provider-warning" class="alert-box warning">
                         <i class="fa-solid fa-triangle-exclamation alert-icon animate-pulse"></i>
                         <div class="warning-text">
                             <strong>Google Workspace Security Notice:</strong>
-                            <p>Do NOT enter your primary account password. You MUST generate a 16-character <strong>App Password</strong> in your Google Account Settings to authorize connection.</p>
+                            <p>Do NOT enter your primary account password. Generate a 16-character <strong>App Password</strong> in your Google Account settings to authorise the connection.</p>
                         </div>
                     </div>
 
-                    <!-- Step 2: Connection Coordinates -->
                     <div class="form-grid">
                         <div class="form-group col-span-2">
-                            <label for="onboard-email">Mailbox Email Address</label>
+                            <label for="onboard-email">Mailbox email address</label>
                             <input type="email" id="onboard-email" placeholder="inbox@domain.com" required>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="onboard-smtp-host">SMTP Host</label>
+                            <label for="onboard-smtp-host">SMTP host</label>
                             <input type="text" id="onboard-smtp-host" value="smtp.gmail.com" required>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="onboard-smtp-port">SMTP Port</label>
+                            <label for="onboard-smtp-port">SMTP port</label>
                             <input type="number" id="onboard-smtp-port" value="465" required>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="onboard-imap-host">IMAP Host</label>
+                            <label for="onboard-imap-host">IMAP host</label>
                             <input type="text" id="onboard-imap-host" value="imap.gmail.com" required>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="onboard-imap-port">IMAP Port</label>
+                            <label for="onboard-imap-port">IMAP port</label>
                             <input type="number" id="onboard-imap-port" value="993" required>
                         </div>
-
-                        <div class="form-group col-span-2">
-                            <label for="onboard-password">App Password</label>
+                        <div class="form-group">
+                            <label for="onboard-password">App password</label>
                             <input type="password" id="onboard-password" placeholder="•••• •••• •••• ••••" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="onboard-limit">Daily send ceiling</label>
+                            <input type="number" id="onboard-limit" value="40" min="1" max="500" required>
                         </div>
                     </div>
 
-                    <!-- Onboarding Submission Controls -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline" id="cancel-onboard-btn">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="onboard-submit-btn">
-                            <span class="btn-text">Authenticate & Onboard</span>
+                            <span class="btn-text">Authenticate &amp; Onboard</span>
                             <div class="spinner hidden" id="onboard-spinner"></div>
                         </button>
                     </div>
@@ -414,7 +519,7 @@
             </div>
         </div>
 
-        <!-- ==================== ANALYTICS & LOG LEDGER SLIDE-OUT ==================== -->
+        <!-- ==================== NODE ANALYTICS MODAL ==================== -->
         <div id="analytics-modal" class="modal-overlay">
             <div class="modal-card wide">
                 <div class="modal-header">
@@ -422,58 +527,52 @@
                         <h2 id="node-details-email">mailbox@domain.com</h2>
                         <p class="subtitle" id="node-details-id">Node ID: mailbox_1</p>
                     </div>
-                    <button class="modal-close-btn" id="close-analytics-btn">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
+                    <button class="modal-close-btn" id="close-analytics-btn"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                
+
                 <div class="analytics-grid">
-                    <!-- Ramp-up progress -->
                     <div class="analytics-card card-progress">
-                        <h3>Ramp-up Target Schedule</h3>
-                        <div class="ramp-percentage" id="node-ramp-val">15 / 40 sends</div>
+                        <h3>Ramp-up target schedule</h3>
+                        <div class="ramp-percentage" id="node-ramp-val">0 / 0 sends</div>
                         <div class="health-bar-container">
-                            <div class="health-bar-fill" id="node-ramp-fill" style="width: 37.5%"></div>
+                            <div class="health-bar-fill" id="node-ramp-fill" style="width: 0%; background: var(--color-primary);"></div>
                         </div>
-                        <p class="card-meta">Increasing daily sends until 30-day ceiling is reached</p>
+                        <p class="card-meta" id="node-ramp-meta">Increasing daily volume toward the 30-day ceiling</p>
                     </div>
-                    
-                    <!-- Placement split -->
+
                     <div class="analytics-card card-split">
-                        <h3>Deliverability Placement Split</h3>
+                        <h3>Deliverability placement split</h3>
                         <div class="placement-split-stat">
                             <div class="split-segment">
                                 <span class="dot bg-green"></span>
-                                <span>Inbox: 75%</span>
+                                <span>Inbox: <strong id="node-inbox-rate">100%</strong></span>
                             </div>
                             <div class="split-segment">
                                 <span class="dot bg-red"></span>
-                                <span>Spam: 25%</span>
+                                <span>Spam: <strong id="node-spam-rate">0%</strong></span>
                             </div>
                         </div>
                         <div class="health-bar-container double">
-                            <div class="health-bar-fill bg-green" style="width: 75%"></div>
-                            <div class="health-bar-fill bg-red" style="width: 25%"></div>
+                            <div class="health-bar-fill bg-green" id="node-inbox-fill" style="width: 100%;"></div>
+                            <div class="health-bar-fill bg-red" id="node-spam-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Log Ledger Panel -->
                 <div class="ledger-panel">
-                    <h3>Execution Activity Ledger</h3>
+                    <h3>Execution activity ledger</h3>
                     <div class="table-container max-h-350">
                         <table class="ledger-table">
                             <thead>
                                 <tr>
                                     <th>Timestamp</th>
                                     <th>Action type</th>
-                                    <th>Target Inbox</th>
-                                    <th>AI Replied</th>
+                                    <th>Target inbox</th>
+                                    <th>AI replied</th>
                                     <th>Result</th>
                                 </tr>
                             </thead>
                             <tbody id="node-logs-body">
-                                <!-- Dynamic log rows go here -->
                                 <tr>
                                     <td colspan="5" class="table-empty">No activity logs recorded. Warmup loops schedule nightly.</td>
                                 </tr>
@@ -485,7 +584,6 @@
         </div>
     </div>
 
-    <!-- Reactive application JS controller -->
     <script src="/static/index.js"></script>
 </body>
 </html>

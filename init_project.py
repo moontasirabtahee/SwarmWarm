@@ -65,9 +65,11 @@ logs/
     print("\nGenerating local .env file...")
     
     # Generate cryptographic keys
-    jwt_secret = secrets.token_urlsafe(32)
-    decryption_key = secrets.token_bytes(32).hex()
-    
+    # AES-256-GCM master key: 32 raw bytes, standard base64 (decodes cleanly to 32 bytes).
+    secret_key = base64.b64encode(secrets.token_bytes(32)).decode()
+    # JWT signing secret: url-safe random token.
+    jwt_secret = secrets.token_urlsafe(48)
+
     env_content = f"""# ==============================================================================
 # SWARMWARM LOCAL DEVELOPMENT CONFIGURATION (AUTO-GENERATED)
 # ==============================================================================
@@ -77,10 +79,10 @@ PORT=8000
 ENV=development
 
 # Cryptographic Keys
-# Auto-generated 32-byte secure JWT secret token
-SWARMWARM_SECRET_KEY={jwt_secret}
-# Auto-generated 32-byte secure hex decryption key (64 hex characters) for AES-GCM
-SWARMWARM_DECRYPTION_KEY={decryption_key}
+# AES-256-GCM master key (base64-encoded 32 bytes) for mailbox credential encryption
+SWARMWARM_SECRET_KEY={secret_key}
+# HS256 JWT session signing secret
+SWARMWARM_JWT_SECRET={jwt_secret}
 
 # Supabase Database Configuration
 SUPABASE_URL=https://your-supabase-project-id.supabase.co

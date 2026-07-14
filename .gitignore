@@ -25,3 +25,11 @@ logs/
 .DS_Store
 Thumbs.db
 
+# Local SQLite database (regenerated/seeded on boot; use Postgres in production)
+*.db
+
+# Test + tooling caches
+.pytest_cache/
+.coverage
+htmlcov/
+

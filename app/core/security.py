@@ -1,24 +1,50 @@
 import os
 import base64
-from dotenv import load_dotenv
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidTag
 
-# Load environmental variables
-load_dotenv()
+from app.core.settings import settings
 
-SECRET_KEY_B64 = os.getenv("SWARMWARM_SECRET_KEY")
+SECRET_KEY_RAW = settings.SWARMWARM_SECRET_KEY
 
-if not SECRET_KEY_B64:
+if not SECRET_KEY_RAW:
     raise ValueError("Missing SWARMWARM_SECRET_KEY environment variable. Check your .env file.")
 
-try:
-    # Decode the base64 master key to raw bytes
-    MASTER_KEY_BYTES = base64.b64decode(SECRET_KEY_B64)
-    if len(MASTER_KEY_BYTES) != 32:
-         raise ValueError("SWARMWARM_SECRET_KEY must decode to exactly 32 bytes.")
-except Exception as e:
-    raise ValueError(f"Invalid SWARMWARM_SECRET_KEY base64 format: {e}")
+
+def _load_master_key(raw: str) -> bytes:
+    """
+    Resolves a 32-byte AES-256 master key from a variety of common encodings so the
+    service is resilient to how the key was generated (standard base64, url-safe
+    base64 with or without padding, or a 64-character hex string).
+    """
+    candidate = raw.strip()
+
+    # 1. Hex (64 hex chars -> 32 bytes)
+    if len(candidate) == 64:
+        try:
+            key = bytes.fromhex(candidate)
+            if len(key) == 32:
+                return key
+        except ValueError:
+            pass
+
+    # 2. Standard / url-safe base64 (tolerate missing padding)
+    for decoder in (base64.b64decode, base64.urlsafe_b64decode):
+        try:
+            padded = candidate + "=" * (-len(candidate) % 4)
+            key = decoder(padded)
+            if len(key) == 32:
+                return key
+        except Exception:
+            continue
+
+    raise ValueError(
+        "SWARMWARM_SECRET_KEY must resolve to exactly 32 bytes "
+        "(base64, url-safe base64, or 64-char hex)."
+    )
+
+
+MASTER_KEY_BYTES = _load_master_key(SECRET_KEY_RAW)
 
 def encrypt_token(plaintext: str) -> str:
     """
